@@ -1,0 +1,391 @@
+﻿@page "/admin/reservations/add"
+@page "/admin/reservations/edit/{ReservationId:guid}"
+@layout MainAdminLayout
+@using Blazored.LocalStorage
+@using Morris.Blazor.FluentValidation
+@using Morris.Blazor.Validation
+@using RentACar.Application.CustomExceptions
+@using RentACar.Application.DTOs
+@using RentACar.Application.Validators
+@using RentACar.Client.Utils
+@using RentACar.Domain.Enums
+@using RentACar.Domain.Enums.Helper
+
+
+<EditForm Model="@reservation" OnValidSubmit="SubmitForm">
+    <Validate ValidationProperties=@(ValidationProperties.Set.FluentValidator<ReservationValitador>()) OnTransformModel=OnTransformModel />
+    <RadzenColumn Size="12" Style="width:%60" SizeMD="6">
+        <RadzenStack>
+            <RadzenFieldset Text="Rezervasyon Ekleme Sayfası">
+                <RadzenStack Gap="1rem">
+
+
+                    <RadzenRow AlignItems="AlignItems.Center">
+
+                        <RadzenColumn Size="12" SizeMD="8">
+                            <RadzenFormField Text="Araba Adı" Variant="@variant">
+
+                                <Start>
+                                    <RadzenIcon Icon="" />
+                                </Start>
+                                <ChildContent>
+                                    <RadzenDropDown class="form-control autocomplete-location" AllowClear="true" @bind-Value=reservation.CarId AllowVirtualization="true" Name="Location"
+                                                    AllowFiltering="true" Data=@Cars TextProperty="CarName" ValueProperty="Id" Placeholder="Araba Adı" />
+
+                                </ChildContent>
+
+                            </RadzenFormField>
+                            <RadzenRow>
+                                <RadzenColumn>
+                                    <ValidationMessage For="@(() => reservation.CarId)" />
+                                </RadzenColumn>
+
+                            </RadzenRow>
+                        </RadzenColumn>
+
+                    </RadzenRow>
+                    <RadzenRow AlignItems="AlignItems.Center">
+                   
+                        <RadzenColumn Size="12" SizeMD="8">
+                            <RadzenFormField Text="Alış Lokasyonu" Variant="@variant">
+
+                                <Start>
+                                    <RadzenIcon Icon="language" />
+                                </Start>
+                                <ChildContent>
+                                    <RadzenDropDown class="form-control autocomplete-location" AllowClear="true" @bind-Value=reservation.StartLocationId AllowVirtualization="true" Name="Location"
+                                                    AllowFiltering="true" Data=@customers TextProperty="Decription" ValueProperty="Id" Placeholder="Alış Lokasyonu Ara" />
+
+                                </ChildContent>
+
+                            </RadzenFormField>
+                            <RadzenRow>
+                                <RadzenColumn>
+                                    <ValidationMessage For="@(() => reservation.StartLocationId)" />
+                                </RadzenColumn>
+
+                            </RadzenRow>
+                        </RadzenColumn>
+                    </RadzenRow>
+                    <RadzenRow AlignItems="AlignItems.Center">
+
+                        <RadzenColumn Size="12" SizeMD="8">
+                            <RadzenFormField Text="Alış Lokasyonu" Variant="@variant">
+
+                                <Start>
+                                    <RadzenIcon Icon="language" />
+                                </Start>
+                                <ChildContent>
+                                    <RadzenDropDown class="form-control autocomplete-location" AllowClear="true" @bind-Value=reservation.EndLocationId AllowVirtualization="true" Name="Location"
+                                                    AllowFiltering="true" Data=@customers TextProperty="Decription" ValueProperty="Id" Placeholder="Bırakılacak Lokasyon Ara" />
+
+                                </ChildContent>
+
+                            </RadzenFormField>
+                            <RadzenRow>
+                                <RadzenColumn>
+                                    <ValidationMessage For="@(() => reservation.EndLocationId)" />
+                                </RadzenColumn>
+
+                            </RadzenRow>
+                        </RadzenColumn>
+                    </RadzenRow>
+                    <RadzenRow AlignItems="AlignItems.Center">
+
+                        <RadzenColumn Size="12" SizeMD="8">
+                            <RadzenFormField Text="Alış Tarih & Saat" Variant="@variant">
+
+
+                                <RadzenDatePicker class="form-control datepicker" @bind-Value=reservation.StartDate ShowTime="true" HourFormat="24" Min="DateTime.Now.Date" DateFormat="dd/MM/yyyy HH:mm" Name="DatePickerHourFormat" />
+
+
+
+                            </RadzenFormField>
+                            <RadzenRow>
+                                <RadzenColumn>
+                                    <ValidationMessage For="@(() => reservation.StartDate)" />
+                                </RadzenColumn>
+
+                            </RadzenRow>
+                        </RadzenColumn>
+                    </RadzenRow>
+                    <RadzenRow AlignItems="AlignItems.Center">
+
+                        <RadzenColumn Size="12" SizeMD="8">
+                            <RadzenFormField Text="Bırakış Tarih & Saat" Variant="@variant">
+
+
+                                <RadzenDatePicker class="form-control datepicker" @bind-Value=reservation.EndDate ShowTime="true" HourFormat="24" Min="DateTime.Now.Date" DateFormat="dd/MM/yyyy HH:mm" Name="DatePickerHourFormat" />
+
+
+
+                            </RadzenFormField>
+                            <RadzenRow>
+                                <RadzenColumn>
+                                    <ValidationMessage For="@(() => reservation.EndDate)" />
+                                </RadzenColumn>
+
+                            </RadzenRow>
+                        </RadzenColumn>
+                    </RadzenRow>
+                    <RadzenRow AlignItems="AlignItems.Center">
+                        <RadzenColumn Size="12" SizeMD="8">
+                            <RadzenPanel>
+                                <HeaderTemplate>
+                                    <RadzenText TextStyle="TextStyle.Subtitle1" Class="rz-display-flex rz-align-items-center rz-m-0">
+                                        <b>Sürücü Ve İletişim Bilgileri</b>
+                                    </RadzenText>
+                                </HeaderTemplate>
+                                <ChildContent>
+                                    <RadzenRow Gap="1rem">
+                                        <RadzenColumn>
+                                            <RadzenStack>
+
+                                                <RadzenFormField AllowFloatingLabel="false" Text="Şirket Adı-İsim Soyisim">
+                                                    <Start>
+                                                        <RadzenIcon Icon="account_circle" />
+                                                    </Start>
+                                                    <ChildContent>
+                                                        <RadzenTextBox @bind-Value="reservation.CustomerName" Name="CustomerName" />
+                                                    </ChildContent>
+
+                                                </RadzenFormField>
+                                                <ValidationMessage style="font-size:x-small" For="@(() => reservation.CustomerName)" />
+                                                <RadzenFormField AllowFloatingLabel="false" Text="Kimlik No Veya Pasaport Numarası">
+                                                    <Start>
+                                                        <RadzenIcon Icon="account_balance_wallet" />
+                                                    </Start>
+                                                    <ChildContent>
+                                                        <RadzenTextBox @bind-Value="reservation.IdentityNo" Name="IdentityNo" />
+                                                    </ChildContent>
+                                                </RadzenFormField>
+                                                <ValidationMessage style="font-size:x-small" For="@(() => reservation.IdentityNo)" />
+                                                <RadzenFormField AllowFloatingLabel="false" Text="Geliş Uçuş No">
+                                                    <Start>
+                                                        <RadzenIcon Icon="flight_land" />
+                                                    </Start>
+                                                    <ChildContent>
+                                                        <RadzenTextBox @bind-Value="reservation.ArrivalFlightNo" Name="ArrivalFlightNo" />
+
+                                                    </ChildContent>
+
+                                                </RadzenFormField>
+                                                <ValidationMessage style="font-size:x-small" For="@(() => reservation.ArrivalFlightNo)" />
+                                                <RadzenFormField AllowFloatingLabel="false" Text="Adres">
+                                                    <Start>
+                                                        <RadzenIcon Icon="assignment" />
+                                                    </Start>
+                                                    <ChildContent>
+                                                        <RadzenTextArea Placeholder="Adres Giriniz" @bind-Value="reservation.Address" class="w-100" aria-label="TextArea with placeholder" />
+                                                    </ChildContent>
+                                                </RadzenFormField>
+
+                                                <ValidationMessage style="font-size:x-small" For="@(() => reservation.Address)" />
+                                            </RadzenStack>
+                                        </RadzenColumn>
+                                        <RadzenColumn>
+                                            <RadzenStack>
+                                                <RadzenFormField AllowFloatingLabel="false" Text="Email Adresi">
+                                                    <Start>
+                                                        <RadzenIcon Icon="markunread_mailbox" />
+                                                    </Start>
+                                                    <ChildContent>
+                                                        <RadzenTextBox @bind-Value="reservation.Email" Name="Email" />
+                                                    </ChildContent>
+                                                </RadzenFormField>
+                                                <ValidationMessage style="font-size:x-small" For="@(() => reservation.Email)" />
+                                                <RadzenFormField Text="Telefon Numarası" AllowFloatingLabel="false">
+                                                    <Start>
+                                                        <RadzenIcon class="fa fa-phone" />
+                                                    </Start>
+                                                    <ChildContent>
+                                                        <RadzenMask Mask="(***) ***-****" CharacterPattern="[0-9]" Placeholder="(555) 555-5555" Name="PhoneNumber" @bind-Value="reservation.PhoneNumber" />
+
+                                                    </ChildContent>
+                                                </RadzenFormField>
+                                                <ValidationMessage style="font-size:x-small" For="@(() => reservation.PhoneNumber)" />
+
+                                                <RadzenFormField AllowFloatingLabel="false" Text="Dönüş Uçuş No">
+                                                    <Start>
+                                                        <RadzenIcon Icon="flight_takeoff" />
+                                                    </Start>
+                                                    <ChildContent>
+                                                        <RadzenTextBox @bind-Value="reservation.ReturnFlightNumber" Name="ReturnFlightNumber" />
+
+                                                    </ChildContent>
+                                                </RadzenFormField>
+                                                <ValidationMessage style="font-size:x-small" For="@(() => reservation.ReturnFlightNumber)" />
+                                                <RadzenFormField AllowFloatingLabel="false" Text="Not">
+                                                    <Start>
+                                                        <RadzenIcon Icon="description" />
+                                                    </Start>
+                                                    <ChildContent>
+                                                        <RadzenTextArea Placeholder="Not giriniz" @bind-Value="reservation.Decription" class="w-100" aria-label="TextArea with placeholder" />
+                                                    </ChildContent>
+                                                </RadzenFormField>
+                                                <ValidationMessage style="font-size:x-small" For="@(() => reservation.Decription)" />
+                                            </RadzenStack>
+
+
+                                        </RadzenColumn>
+                                    </RadzenRow>
+                                    <RadzenRow class="rz-my-4">
+                                        <RadzenColumn Size="4" OffsetLG="4">
+
+                                        </RadzenColumn>
+                                    </RadzenRow>
+                                </ChildContent>
+
+                            </RadzenPanel>
+                        </RadzenColumn>
+                    </RadzenRow>
+                    <RadzenRow AlignItems="AlignItems.Center">
+                        <RadzenColumn Size="12" SizeMD="4">
+                            <RadzenLabel Text="Kiralık Fiyatı" />
+                        </RadzenColumn>
+                        <RadzenColumn Size="12" SizeMD="8">
+                            <RadzenNumeric Style="width: 50%;" @bind-Value="reservation.RentPrice" Name="RentPrice" />
+                            <ValidationMessage For="@(() => reservation.RentPrice)" />
+                        </RadzenColumn>
+                    </RadzenRow>
+                     <RadzenRow AlignItems="AlignItems.Center">
+                        <RadzenColumn Size="12" SizeMD="4">
+                            <RadzenLabel Text="Ek Ürün Fiyat" />
+                        </RadzenColumn>
+                        <RadzenColumn Size="12" SizeMD="8">
+                            <RadzenNumeric Style="width: 50%;" @bind-Value="reservation.AdditionalProductPrice " Name="AdditionalProductPrice " />
+                            <ValidationMessage For="@(() => reservation.AdditionalProductPrice )" />
+                        </RadzenColumn>
+                    </RadzenRow>
+                     <RadzenRow AlignItems="AlignItems.Center">
+                        <RadzenColumn Size="12" SizeMD="4">
+                            <RadzenLabel Text="Toplam Fiyat" />
+                        </RadzenColumn>
+                        <RadzenColumn Size="12" SizeMD="8">
+                            <RadzenNumeric Style="width: 50%;" @bind-Value="reservation.TotalPrice" Name="TotalPrice" />
+                            <ValidationMessage For="@(() => reservation.TotalPrice)" />
+                        </RadzenColumn>
+                    </RadzenRow>
+
+
+                    @*                     <RadzenRow AlignItems="AlignItems.Center">
+                    <RadzenColumn Size="12" SizeMD="4">
+                    <RadzenLabel Text="Expiry Date" />
+                    </RadzenColumn>
+                    <RadzenColumn Size="12" SizeMD="8">
+                    <RadzenDatePicker Style="width: 100%;" Name="ExpiryDate" @bind-Value="order.ExpiryDate" />
+                    </RadzenColumn>
+                    </RadzenRow>
+                    <RadzenRow AlignItems="AlignItems.Center">
+                    <RadzenColumn Size="12" SizeMD="4">
+                    <RadzenLabel Text="Cardholder" />
+                    </RadzenColumn>
+                    <RadzenColumn Size="12" SizeMD="8">
+                    <RadzenTextBox Style="width: 100%;" Name="CardHolder" />
+                    </RadzenColumn>
+                    </RadzenRow> *@
+                </RadzenStack>
+            </RadzenFieldset>
+        </RadzenStack>
+    </RadzenColumn>
+    <RadzenStack Orientation="Orientation.Horizontal" JustifyContent="JustifyContent.Center" Gap="1rem" Class="rz-mt-8 rz-mb-4">
+        <RadzenButton ButtonType="ButtonType.Submit" Size="ButtonSize.Large" Icon="save" Text="Kaydet" />
+        <RadzenButton ButtonStyle="ButtonStyle.Light" Variant="Variant.Flat" Size="ButtonSize.Large" Icon="cancel" Text="Geri Dön" Click="@goBackGroupList" />
+    </RadzenStack>
+</EditForm>
+
+
+
+@code {
+    [Parameter]
+    public Guid ReservationId { get; set; }
+    [Inject]
+    public HttpClient HttpClient { get; set; }
+
+    [Inject]
+    public ModalManager ModalManager { get; set; }
+
+    [Inject]
+    public NavigationManager NavigationManager { get; set; }
+    [Inject]
+    ILocalStorageService localStorageService { get; set; }
+    List<LocationDTO> customers = new List<LocationDTO>();
+
+
+    private ReservationDTO reservation = new ReservationDTO();
+    protected IEnumerable<CarDTO> Cars;
+    Variant variant = Variant.Outlined;
+
+    protected async override Task OnInitializedAsync()
+    {
+        string token = await localStorageService.GetItemAsStringAsync("token");
+        Cars = await HttpClient.GetServiceResponseAsync<List<CarDTO>>("/api/car/cars", token);
+        customers = await HttpClient.GetServiceResponseNullTokenAsync<List<LocationDTO>>("api/Locatio/Locations");
+        if (ReservationId != null && ReservationId != Guid.Empty)
+        {
+            
+            reservation = await HttpClient.GetServiceResponseAsync<ReservationDTO>("api/Reserve/ReservationById/" + ReservationId, token, true);
+
+        }
+      
+
+
+    }
+    async Task editOrUpdate(ReservationDTO reservationDTO)
+    {
+
+        try
+        {
+
+            String url = "api/Reservation/create";
+            reservation = reservationDTO;
+            // Update
+            if (ReservationId != null && ReservationId != Guid.Empty)
+            {
+                url = "api/Reservation/update";
+                reservation.UpdatedDate = DateTime.Now;
+                reservation.UpdatedUser = await localStorageService.GetItemAsStringAsync("email");
+            }
+            else
+            {
+                reservation.CreateDate = DateTime.Now;
+                reservation.CreatedUser = await localStorageService.GetItemAsStringAsync("email");
+            }
+            string token = await localStorageService.GetItemAsStringAsync("token");
+
+            reservation = await HttpClient.PostGetServiceResponseAsync<ReservationDTO, ReservationDTO>(url, reservation, token, true);
+
+            NavigationManager.NavigateTo("/admin/reservations");
+        }
+        catch (ApiException ex)
+        {
+            await ModalManager.ShowMessageAsync("Api Exception", ex.Message);
+        }
+        catch (Exception ex)
+        {
+            await ModalManager.ShowMessageAsync("Exception", ex.Message);
+        }
+
+
+
+
+    }
+    async Task SubmitForm(EditContext editContext)
+    {
+        if (editContext.Validate())
+        {
+            await editOrUpdate((ReservationDTO)editContext.Model);
+        }
+    }
+    void goBackGroupList()
+    {
+        NavigationManager.NavigateTo("/admin/reservations");
+    }
+    private object OnTransformModel(object model)
+    {
+        // Confirm that the model is of the expected type
+        // Do transformations here
+        // return the transformed model
+        return model;
+    }
+}

@@ -1,0 +1,79 @@
+<Project Sdk="Microsoft.NET.Sdk.BlazorWebAssembly">
+
+  <PropertyGroup>
+    <TargetFramework>net7.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <ServiceWorkerAssetsManifest>service-worker-assets.js</ServiceWorkerAssetsManifest>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Content Remove="Pages\OnePage\CarOptionRezervartion.razor" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Blazored.LocalStorage" Version="4.4.0" />
+    <PackageReference Include="Blazored.Modal" Version="7.1.0" />
+    <PackageReference Include="Blazored.Typeahead" Version="4.7.0" />
+    <PackageReference Include="FluentValidation" Version="11.8.1" />
+    <PackageReference Include="Markdig" Version="0.36.2" />
+    <PackageReference Include="Microsoft.AspNetCore.Components.Authorization" Version="7.0.14" />
+    <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly" Version="7.0.13" />
+    <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.DevServer" Version="7.0.13" PrivateAssets="all" />
+    <PackageReference Include="Microsoft.AspNetCore.SignalR.Client" Version="7.0.18" />
+    <PackageReference Include="Morris.Blazor.FluentValidation" Version="3.0.0" />
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
+    <PackageReference Include="Radzen.Blazor" Version="4.23.2" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\Core\RentACar.Application\RentACar.Application.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ServiceWorker Include="wwwroot\service-worker.js" PublishedContent="wwwroot\service-worker.published.js" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <UpToDateCheckInput Remove="Pages\OnePage\CarOptionRezervartion.razor" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <_ContentIncludedByDefault Remove="Pages\OnePage\CarOptionRezervartion.razor" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="Pages\OnePage\CarOptionRezervartion.razor" />
+    <None Include="wwwroot\website\font-awesome-4.7.0\fonts\fontawesome-webfont.svg" />
+    <None Include="wwwroot\website\font-awesome-4.7.0\fonts\fontawesome-webfont.woff2" />
+    <None Include="wwwroot\website\font-awesome-4.7.0\less\animated.less" />
+    <None Include="wwwroot\website\font-awesome-4.7.0\less\bordered-pulled.less" />
+    <None Include="wwwroot\website\font-awesome-4.7.0\less\core.less" />
+    <None Include="wwwroot\website\font-awesome-4.7.0\less\fixed-width.less" />
+    <None Include="wwwroot\website\font-awesome-4.7.0\less\font-awesome.less" />
+    <None Include="wwwroot\website\font-awesome-4.7.0\less\icons.less" />
+    <None Include="wwwroot\website\font-awesome-4.7.0\less\larger.less" />
+    <None Include="wwwroot\website\font-awesome-4.7.0\less\list.less" />
+    <None Include="wwwroot\website\font-awesome-4.7.0\less\mixins.less" />
+    <None Include="wwwroot\website\font-awesome-4.7.0\less\path.less" />
+    <None Include="wwwroot\website\font-awesome-4.7.0\less\rotated-flipped.less" />
+    <None Include="wwwroot\website\font-awesome-4.7.0\less\screen-reader.less" />
+    <None Include="wwwroot\website\font-awesome-4.7.0\less\stacked.less" />
+    <None Include="wwwroot\website\font-awesome-4.7.0\less\variables.less" />
+    <None Include="wwwroot\website\font-awesome-4.7.0\scss\font-awesome.scss" />
+    <None Include="wwwroot\website\font-awesome-4.7.0\scss\_animated.scss" />
+    <None Include="wwwroot\website\font-awesome-4.7.0\scss\_bordered-pulled.scss" />
+    <None Include="wwwroot\website\font-awesome-4.7.0\scss\_core.scss" />
+    <None Include="wwwroot\website\font-awesome-4.7.0\scss\_fixed-width.scss" />
+    <None Include="wwwroot\website\font-awesome-4.7.0\scss\_icons.scss" />
+    <None Include="wwwroot\website\font-awesome-4.7.0\scss\_larger.scss" />
+    <None Include="wwwroot\website\font-awesome-4.7.0\scss\_list.scss" />
+    <None Include="wwwroot\website\font-awesome-4.7.0\scss\_mixins.scss" />
+    <None Include="wwwroot\website\font-awesome-4.7.0\scss\_path.scss" />
+    <None Include="wwwroot\website\font-awesome-4.7.0\scss\_rotated-flipped.scss" />
+    <None Include="wwwroot\website\font-awesome-4.7.0\scss\_screen-reader.scss" />
+    <None Include="wwwroot\website\font-awesome-4.7.0\scss\_stacked.scss" />
+    <None Include="wwwroot\website\font-awesome-4.7.0\scss\_variables.scss" />
+  </ItemGroup>
+
+</Project>

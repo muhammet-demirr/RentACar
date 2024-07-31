@@ -1,0 +1,132 @@
+﻿@page "/admin/partners/add"
+@page "/admin/partners/edit/{PartnerId:guid}"
+@using Blazored.LocalStorage
+@using Morris.Blazor.FluentValidation
+@using Morris.Blazor.Validation
+@using RentACar.Application.CustomExceptions
+@using RentACar.Application.DTOs
+@using RentACar.Application.Validators
+@using RentACar.Client.Utils
+@layout MainAdminLayout
+<EditForm Model="@partner" OnValidSubmit="SubmitForm">
+    <Validate ValidationProperties=@(ValidationProperties.Set.FluentValidator<PartnerValidator>()) OnTransformModel=OnTransformModel />
+    <RadzenColumn Size="12" Style="width:%60" SizeMD="6">
+        <RadzenStack>
+            <RadzenFieldset Text="Referans Ekleme Sayfası">
+                <RadzenStack Gap="1rem">
+
+                    <RadzenRow AlignItems="AlignItems.Center">
+                        <RadzenColumn Size="12" SizeMD="4">
+                            <RadzenLabel Text="Fotoğraf" />
+                        </RadzenColumn>
+                        <RadzenColumn Size="12" SizeMD="8">
+                            <RadzenFileInput @bind-Value=@partner.Image @bind-FileName=@fileName @bind-FileSize=@fileSize TValue="string" class="w-50" />
+                            <ValidationMessage For="@(() => partner.Image)" />
+                        </RadzenColumn>
+                    </RadzenRow>
+                    <RadzenRow AlignItems="AlignItems.Center">
+                        <RadzenColumn Size="12" SizeMD="4">
+                            <RadzenLabel Text="Hizmet Adı" />
+                        </RadzenColumn>
+                        <RadzenColumn Size="12" SizeMD="8">
+                            <RadzenTextBox Style="width: 50%;" @bind-Value="partner.PartnerName" Name="PartnerName" />
+                            <ValidationMessage For="@(() => partner.PartnerName)" />
+                        </RadzenColumn>
+
+                    </RadzenRow>
+                </RadzenStack>
+            </RadzenFieldset>
+        </RadzenStack>
+    </RadzenColumn>
+    <RadzenStack Orientation="Orientation.Horizontal" JustifyContent="JustifyContent.Center" Gap="1rem" Class="rz-mt-8 rz-mb-4">
+        <RadzenButton ButtonType="ButtonType.Submit" Size="ButtonSize.Large" Icon="save" Text="Kaydet" />
+        <RadzenButton ButtonStyle="ButtonStyle.Light" Variant="Variant.Flat" Size="ButtonSize.Large" Icon="cancel" Text="Geri Dön" Click="@goBackGroupList" />
+    </RadzenStack>
+</EditForm>
+
+@code {
+    [Parameter]
+    public Guid PartnerId { get; set; }
+    [Inject]
+    public HttpClient HttpClient { get; set; }
+
+    [Inject]
+    public ModalManager ModalManager { get; set; }
+
+    [Inject]
+    public NavigationManager NavigationManager { get; set; }
+    [Inject]
+    ILocalStorageService localStorageService { get; set; }
+
+    private PartnerDTO partner = new PartnerDTO();
+    string fileName;
+    long? fileSize;
+    protected async override Task OnInitializedAsync()
+    {
+
+        if (PartnerId != null && PartnerId != Guid.Empty)
+        {
+            string token = await localStorageService.GetItemAsStringAsync("token");
+            partner = await HttpClient.GetServiceResponseAsync<PartnerDTO>("api/Partner/PartnerById/" + PartnerId, token, true);
+        }
+
+
+    }
+    async Task editOrUpdate(PartnerDTO partnerDTO)
+    {
+
+        try
+        {
+
+            String url = "api/Partner/Create";
+            partner = partnerDTO;
+            // Update
+            if (PartnerId != null && PartnerId != Guid.Empty)
+            {
+                url = "api/partner/update";
+                partner.UpdatedDate = DateTime.Now;
+                partner.UpdatedUser = await localStorageService.GetItemAsStringAsync("email");
+            }
+            else
+            {
+                partner.CreateDate = DateTime.Now;
+                partner.CreatedUser = await localStorageService.GetItemAsStringAsync("email");
+            }
+            string token = await localStorageService.GetItemAsStringAsync("token");
+
+            partner = await HttpClient.PostGetServiceResponseAsync<PartnerDTO, PartnerDTO>(url, partner, token, true);
+
+            NavigationManager.NavigateTo("/admin/partners");
+        }
+        catch (ApiException ex)
+        {
+            await ModalManager.ShowMessageAsync("Api Exception", ex.Message);
+        }
+        catch (Exception ex)
+        {
+            await ModalManager.ShowMessageAsync("Exception", ex.Message);
+        }
+
+
+
+
+    }
+    async Task SubmitForm(EditContext editContext)
+    {
+        if (editContext.Validate())
+        {
+            await editOrUpdate((PartnerDTO)editContext.Model);
+        }
+    }
+    void goBackGroupList()
+    {
+        NavigationManager.NavigateTo("/admin/partners");
+    }
+    private object OnTransformModel(object model)
+    {
+        // Confirm that the model is of the expected type
+        // Do transformations here
+        // return the transformed model
+        return model;
+    }
+}

@@ -1,0 +1,196 @@
+﻿@page "/reservationcompleted/{ReservationId:guid}"
+@using RentACar.Application.CustomExceptions
+@using RentACar.Application.DTOs
+@using RentACar.Client.Utils
+@layout EmptyLayout
+@inject NotificationService NotificationService
+<div class="container">
+    <div style="text-align:center" class="row box">
+        <div class="col-md-5">
+            <!-- Logo start -->
+
+            <div class="brand">
+                <h1>
+                    <RadzenStack AlignItems="AlignItems.Start" JustifyContent="JustifyContent.Center" class="rz-mx-auto">
+                        <a class="scroll-to" href="#top">
+                            <img class="img-responsive" src="/website/beyaz-logo.png" alt="Car|Rental">
+                        </a>
+                    </RadzenStack>
+
+                </h1>
+            </div>
+
+
+            <!-- Logo end -->
+        </div>
+    </div>
+    <RadzenStack Orientation="Orientation.Vertical" JustifyContent="JustifyContent.Left" Class="rz-p-4">
+
+        <RadzenText TextAlign="TextAlign.Left" TextStyle="TextStyle.Subtitle1"><b>@reservation.StartDate - @reservation.EndDate </b></RadzenText>
+        
+
+
+    </RadzenStack>
+    <RadzenStack Gap="1rem" Orientation="Orientation.Vertical" JustifyContent="JustifyContent.SpaceBetween" Style="height: 100%;">
+        <RadzenStack>
+    
+            <RadzenRow>
+                <RadzenColumn Size="12" SizeMD="6" Class="rz-p-4 rz-border-radius-1" Style="border: var(--rz-grid-cell-border);border-color:#f86207;border-width:2px;border-radius:5px">
+                    <RadzenText TextStyle="TextStyle.Subtitle1">Contact</RadzenText>
+                    <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center">
+
+                        <RadzenStack Gap="0" Class="rz-text-truncate">
+                            <RadzenText TextStyle="TextStyle.Overline" Class="rz-mt-2 rz-my-0" Style="color: var(--rz-text-tertiary-color);">Şirket veya Sahış Adı</RadzenText>
+                            <RadzenText TextStyle="TextStyle.Body1" Class="rz-text-truncate"><b>@(reservation?.CustomerName)</b></RadzenText>
+                            <RadzenText TextStyle="TextStyle.Overline" Class="rz-mt-4 rz-mb-0" Style="color: var(--rz-text-tertiary-color);">KimlikNo veya PasaportNo</RadzenText>
+                            <RadzenText TextStyle="TextStyle.Body1" Class="rz-text-truncate"><b>@reservation?.IdentityNo</b></RadzenText>
+                            <RadzenText TextStyle="TextStyle.Overline" Class="rz-mt-4 rz-mb-0" Style="color: var(--rz-text-tertiary-color);">Geliş Uçuş No</RadzenText>
+                            <RadzenText TextStyle="TextStyle.Body1" Class="rz-text-truncate"><b>@reservation?.ArrivalFlightNo</b></RadzenText>
+                            <RadzenText TextStyle="TextStyle.Overline" Class="rz-mt-4 rz-mb-0" Style="color: var(--rz-text-tertiary-color);">Adres</RadzenText>
+                            <RadzenText TextStyle="TextStyle.Body1" Class="rz-text-truncate"><b>@reservation?.Address</b></RadzenText>
+                        </RadzenStack>
+                    </RadzenStack>
+                </RadzenColumn>
+                <RadzenColumn Size="12" SizeMD="6" Class="rz-p-4 rz-border-radius-1" Style="border: var(--rz-grid-cell-border);border-color:#f86207;border-width:2px;border-radius:5px">
+                    <RadzenText TextStyle="TextStyle.Subtitle1">Delivery Information</RadzenText>
+                    <RadzenStack Gap="0" Class="rz-text-truncate">
+                        <RadzenText TextStyle="TextStyle.Overline" Class="rz-mt-2 rz-my-0" Style="color: var(--rz-text-tertiary-color);">Email</RadzenText>
+                        <RadzenText TextStyle="TextStyle.Body1" Class="rz-text-truncate"><b>@(reservation?.Email)</b></RadzenText>
+                        <RadzenText TextStyle="TextStyle.Overline" Class="rz-mt-2 rz-my-0" Style="color: var(--rz-text-tertiary-color);">Telefon No</RadzenText>
+                        <RadzenText TextStyle="TextStyle.Body1" Class="rz-text-truncate"><b>@(reservation.PhoneNumber)</b></RadzenText>
+                        <RadzenText TextStyle="TextStyle.Overline" Class="rz-mt-2 rz-my-0" Style="color: var(--rz-text-tertiary-color);">Dönüş Uçuş No</RadzenText>
+                        <RadzenText TextStyle="TextStyle.Body1" Class="rz-text-truncate"><b>@(reservation.ReturnFlightNumber)</b></RadzenText>
+                        <RadzenText TextStyle="TextStyle.Overline" Class="rz-mt-2 rz-my-0" Style="color: var(--rz-text-tertiary-color);">Not</RadzenText>
+                        <RadzenText TextStyle="TextStyle.Body1" Class="rz-text-truncate"><b>@(reservation.Decription)</b></RadzenText>
+                    </RadzenStack>
+                </RadzenColumn>
+            </RadzenRow>
+            <RadzenStack Orientation="Orientation.Horizontal" JustifyContent="JustifyContent.SpaceBetween" AlignItems="AlignItems.Center">
+                <RadzenText TextStyle="TextStyle.Subtitle1" Class="rz-m-0">Ek Ürünler Ve Sigorta</RadzenText>
+             
+            </RadzenStack>
+            <RadzenDataGrid AllowFiltering="true" AllowPaging="true"  AllowSorting="true" FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive"
+                            Data="@(reservationOptions)" TItem="ReservationOptionDTO" ColumnWidth="200px" Density="Density.Compact" AllowAlternatingRows="false" >
+                <Columns>
+                    <RadzenDataGridColumn TItem="ReservationOptionDTO" Property="OptionName" Title="Opsiyon Adı" />
+                    <RadzenDataGridColumn TItem="ReservationOptionDTO" Property="OptionCount" Title="Miktarı" />
+                    <RadzenDataGridColumn TItem="ReservationOptionDTO" Property="TotalOptionPrice" Title="Fiyatı" FormatString="{0:C}" />
+                </Columns>
+            </RadzenDataGrid>
+            <RadzenBadge BadgeStyle="BadgeStyle.Secondary" Text=@($"{String.Format(new System.Globalization.CultureInfo("tr-TR"), "{0:C}", reservation.AdditionalProductPrice)}") />
+        </RadzenStack>
+
+    </RadzenStack>
+    <RadzenCard Class="rz-my-4 rz-mx-auto" Style="border-style:solid;border-color:#f86207;border-width:2px;border-radius:5px">
+
+        <RadzenRow>
+            <RadzenColumn>
+                <RadzenStack Orientation="Orientation.Vertical" JustifyContent="JustifyContent.Center" Class="rz-p-4">
+                    @*                 <RadzenText TextStyle="TextStyle.H5"><b>@(car?.CarNameModel)</b></RadzenText> *@
+                    <RadzenImage Path="@car?.Photo" Style="width: 250px; height: 250px;" />
+
+                </RadzenStack>
+
+            </RadzenColumn>
+            <RadzenColumn>
+                <RadzenCard class="rz-shadow-0 rz-border-radius-0 rz-p-8" style="background-color:#f86207;">
+                    <RadzenRow RowGap="0">
+                        <RadzenColumn>
+                            <RadzenText TextStyle="TextStyle.Overline" class="rz-color-on-primary-dark rz-display-flex rz-mt-4 rz-mb-0"><i class="fa fa-arrows-v" style="color:white;margin-right:0.2rem" aria-hidden="true"></i> Vites Türü</RadzenText>
+                            <RadzenText TextStyle="TextStyle.Body1" class="rz-color-on-primary-light"><b>@(car?.gear)</b></RadzenText>
+                            <RadzenText TextStyle="TextStyle.Overline" class="rz-color-on-primary-light rz-display-flex rz-mt-4 rz-mb-0"><i class="fa fa-calendar" style="color:white;margin-right:0.2rem" aria-hidden="true"></i> Min Yaş</RadzenText>
+                            <RadzenText TextStyle="TextStyle.Body1" class="rz-color-on-primary-light"><b>@(car?.CarYear)</b></RadzenText>
+                            <RadzenText TextStyle="TextStyle.Overline" class="rz-color-on-primary-light rz-display-flex rz-mt-4 rz-mb-0"><i class="fa fa-picture-o" style="color:white;margin-right:0.2rem" aria-hidden="true"></i> Ehliyet</RadzenText>
+                            <RadzenText TextStyle="TextStyle.Body1" class="rz-color-on-primary-light"><b>@(car?.DrivingLicense) Yıl</b></RadzenText>
+                            <RadzenText TextStyle="TextStyle.Overline" class="rz-color-on-primary-light rz-display-flex rz-mt-4 rz-mb-0"><i class="fa fa-users" style="color:white;margin-right:0.2rem" aria-hidden="true"></i> Kişi Sayısı</RadzenText>
+                            <RadzenText TextStyle="TextStyle.Body1" class="rz-color-on-primary-light"><b>@(car?.Person) Kişi</b></RadzenText>
+                            <RadzenText TextStyle="TextStyle.Overline" class="rz-color-on-primary-light rz-display-flex rz-mt-4 rz-mb-0"><i class="fa fa-eraser" style="color:white;margin-right:0.2rem"></i>Kapı</RadzenText>
+                            <RadzenText TextStyle="TextStyle.Body1" class="rz-color-on-primary-light"><b>@car?.Door</b></RadzenText>
+                        </RadzenColumn>
+                        <RadzenColumn>
+                            <RadzenText TextStyle="TextStyle.Overline" class="rz-color-on-primary-light rz-display-flex rz-mt-4 rz-mb-0"><i class="fa fa-bolt" style="color:white;margin-right:0.2rem" aria-hidden="true"></i> Yakıt Türü</RadzenText>
+                            <RadzenText TextStyle="TextStyle.Body1" class="rz-color-on-primary-light"><b>@(car?.FuelType)</b></RadzenText>
+                            <RadzenText TextStyle="TextStyle.Overline" class="rz-color-on-primary-light rz-display-flex rz-mt-4 rz-mb-0"><i class="fa fa-money" style="color:white;margin-right:0.2rem" aria-hidden="true"></i>Teminat</RadzenText>
+                            <RadzenText TextStyle="TextStyle.Body1" class="rz-color-on-primary-light"><b>@car?.Depozit</b> ₺</RadzenText>
+                            <RadzenText TextStyle="TextStyle.Overline" class="rz-color-on-primary-light rz-display-flex rz-mt-4 rz-mb-0"><i class="fa fa-tasks" style="color:white;margin-right:0.2rem" aria-hidden="true"></i> Toplam Km</RadzenText>
+                            <RadzenText TextStyle="TextStyle.Body1" class="rz-color-on-primary-light"><b>@car?.TotalKm</b> Km</RadzenText>
+                            <RadzenText TextStyle="TextStyle.Overline" class="rz-color-on-primary-light rz-display-flex rz-mt-4 rz-mb-0"><i class="fa fa-suitcase" style="color:white;margin-right:0.2rem" aria-hidden="true"></i>Bagaj</RadzenText>
+                            <RadzenText TextStyle="TextStyle.Body1" class="rz-color-on-primary-light"><b>@car?.Luggage</b> Bagaj</RadzenText>
+                            <RadzenText TextStyle="TextStyle.Overline" class="rz-color-on-primary-light rz-display-flex rz-mt-4 rz-mb-0"><i class="fa fa-snowflake-o" style="color:white;margin-right:0.2rem" aria-hidden="true"></i>Klima</RadzenText>
+
+                            @if (car.IsAc)
+                            {
+                                <RadzenText TextStyle="TextStyle.Body1" class="rz-color-on-primary-light"><b>Var</b></RadzenText>
+                            }
+                            else
+                            {
+                                <RadzenText TextStyle="TextStyle.Body1" class="rz-color-on-primary-light"><b>Yok</b></RadzenText>
+                            }
+
+                        </RadzenColumn>
+                    </RadzenRow>
+                </RadzenCard>
+
+            </RadzenColumn>
+            <RadzenColumn>
+                <RadzenStack Orientation="Orientation.Vertical" JustifyContent="JustifyContent.Center" Class="rz-p-4">
+                    <RadzenText TextStyle="TextStyle.Subtitle1"><b>Gün</b></RadzenText>
+                    <RadzenText TextStyle="TextStyle.Body1"><b>@day Gün İçin</b></RadzenText>
+                    <RadzenText TextStyle="TextStyle.Subtitle1"><b>Günlük Fiyat</b></RadzenText>
+                    <RadzenText TextStyle="TextStyle.Body1"><b>@($"{String.Format(new System.Globalization.CultureInfo("tr-TR"), "{0:C}", reservation.RentPrice)}")</b></RadzenText>
+                    <RadzenText TextStyle="TextStyle.Subtitle1"><b>Toplam Tutar</b></RadzenText>
+                    <RadzenText TextStyle="TextStyle.Body1"><b>@($"{String.Format(new System.Globalization.CultureInfo("tr-TR"), "{0:C}", reservation.RentPrice * day)}")</b></RadzenText>
+
+                </RadzenStack>
+            </RadzenColumn>
+        </RadzenRow>
+
+
+    </RadzenCard>
+
+            <RadzenStack Orientation="Orientation.Vertical" JustifyContent="JustifyContent.Right" Class="rz-p-12">
+        
+                <RadzenText TextAlign="TextAlign.Right" TextStyle="TextStyle.Subtitle1"><b>Ek Ürün Sigorta Toplamı: </b> <b>@($"{String.Format(new System.Globalization.CultureInfo("tr-TR"), "{0:C}", reservation.AdditionalProductPrice)}")</b></RadzenText>
+        <RadzenText TextAlign="TextAlign.Right" TextStyle="TextStyle.Subtitle1"><b>Araç X Gün Toplamı: </b><b>@($"{String.Format(new System.Globalization.CultureInfo("tr-TR"), "{0:C}", reservation.RentPrice * day)}")</b></RadzenText>
+
+        <RadzenText TextAlign="TextAlign.Right" TextStyle="TextStyle.Subtitle1"><b>Genel Toplam: </b><b>@($"{String.Format(new System.Globalization.CultureInfo("tr-TR"), "{0:C}", reservation.TotalPrice)}")</b></RadzenText>
+           
+
+            </RadzenStack>
+
+</div>
+
+@code {
+    [Parameter]
+    public Guid ReservationId { get; set; }
+    [Inject]
+    HttpClient Client { get; set; }
+    [Inject]
+    ModalManager ModalManager { get; set; }
+    CarDTO car = new CarDTO();
+    ReservationDTO reservation = new ReservationDTO();
+    List<ReservationOptionDTO> reservationOptions;
+    TimeSpan dt;
+    int day;
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            reservation = await Client.GetServiceResponseNullTokenAsync<ReservationDTO>("api/reserve/ReservationById/" + ReservationId.ToString());
+            dt = Convert.ToDateTime(reservation.EndDate) - Convert.ToDateTime(reservation.StartDate);
+            day = Convert.ToInt32(dt.TotalDays);
+            car = await Client.GetServiceResponseNullTokenAsync<CarDTO>("api/car/CarById/" + reservation.CarId.ToString());
+            reservationOptions = await Client.GetServiceResponseNullTokenAsync<List<ReservationOptionDTO>>("/api/ReservationOption/ReservationsOptionsById/" + ReservationId.ToString());
+            NotificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Success, Summary = "Başarılı", Detail = "Rezervasyon işlemi başarılı bir şekilde tamamlanmıştır mail üzerinden bilgilendirileceksiniz. ", Duration = 2000 });
+        }
+        catch (ApiException ex)
+        {
+            await ModalManager.ShowMessageAsync("Api Error", ex.Message);
+        }
+        catch (Exception ex)
+        {
+            await ModalManager.ShowMessageAsync("Link Error", ex.Message);
+        }
+
+    }
+}

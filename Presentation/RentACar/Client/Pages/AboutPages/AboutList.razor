@@ -1,0 +1,113 @@
+﻿@page "/admin/abouts"
+@using Blazored.LocalStorage
+@using RentACar.Application.CustomExceptions
+@using RentACar.Application.DTOs
+@using RentACar.Client.Utils
+@layout MainAdminLayout
+@if (Abouts==null || Abouts.Count()==0)
+{
+    <RadzenButton Shade="Shade.Dark" Click=goCreateAboutPage Icon="add" Variant="Variant.Flat" Text="Hakkımızda Ekle" ButtonStyle="ButtonStyle.Success" />
+}
+
+
+<RadzenDataGrid AllowFiltering="true"
+                FilterMode="FilterMode.Simple"
+                ShowCellDataAsTooltip="true"
+                ColumnWidth="200px"
+                FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive"
+                AllowColumnPicking="true"
+                AllowPaging="true" PageSize="10"
+                AllowSorting="true" Data="@Abouts"
+                TItem="AboutDTO">
+    <Columns>
+        <RadzenDataGridColumn TItem="AboutDTO" Context="about" Filterable="false" Sortable="false" TextAlign="TextAlign.Right" Width="156px">
+            <Template Context="about">
+                <RadzenButton Icon="edit" ButtonStyle="ButtonStyle.Light" Variant="Variant.Flat" Size="ButtonSize.Medium" Click="@(() => goUpdateAboutPage(about.Id))">
+                </RadzenButton>
+                <RadzenButton ButtonStyle="ButtonStyle.Danger" Icon="delete" Variant="Variant.Flat" Shade="Shade.Lighter" Size="ButtonSize.Medium" class="my-1 ms-1" Click="@(() => DeleteAbout(about.Id))">
+                </RadzenButton>
+            </Template>
+        </RadzenDataGridColumn>
+
+        <RadzenDataGridColumn TItem="AboutDTO" Property="Title" Title="Başlık" />
+
+        <RadzenDataGridColumn TItem="AboutDTO" Property="Link" Title="Link" />
+
+        <RadzenDataGridColumn TItem="AboutDTO" Property="Text" Title="Hakkımızda" />
+
+    </Columns>
+</RadzenDataGrid>
+
+@code {
+    [Inject]
+    public HttpClient Client { get; set; }
+
+    [Inject]
+    ModalManager ModalManager { get; set; }
+
+    [Inject]
+    NavigationManager NavigationManager { get; set; }
+    [Inject]
+    ILocalStorageService localStorageService { get; set; }
+
+    protected IEnumerable<AboutDTO> Abouts;
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadList();
+
+    }
+    protected async Task LoadList()
+    {
+        try
+        {
+       
+            string token = await localStorageService.GetItemAsStringAsync("token");
+            Abouts = await Client.GetServiceResponseAsync<List<AboutDTO>>("/api/about/abouts", token);
+        }
+        catch (ApiException ex)
+        {
+            await ModalManager.ShowMessageAsync("Api Exception", ex.Message);
+        }
+        catch (Exception ex)
+        {
+
+            await ModalManager.ShowMessageAsync("Exception Exception", ex.Message);
+        }
+    }
+    protected void goCreateAboutPage()
+    {
+        NavigationManager.NavigateTo("/admin/abouts/add");
+    }
+    protected void goUpdateAboutPage(Guid Id)
+    {
+        NavigationManager.NavigateTo("/admin/abouts/edit/" + Id);
+    }
+    protected async Task DeleteAbout(Guid Id)
+    {
+        bool confirmed = await ModalManager.ConfirmationAsync("Silme İşlemi", "Hakkımızda yazısını silmek istediğinize eminmisiniz ?");
+        if (!confirmed) return;
+        try
+        {
+            string token = await localStorageService.GetItemAsStringAsync("token");
+            bool deleted = await Client.PostGetServiceResponseAsync<bool, Guid>("/api/abouts/delete", Id, token);
+            if (deleted)
+            {
+                await ModalManager.ShowMessageAsync("Bildirim", "Silme İşlemi Tamamlandı", 4);
+                NavigationManager.NavigateTo("/admin/abouts", true);
+            }
+            else
+            {
+                await ModalManager.ShowMessageAsync("Bildirim", "Silme İşlemi Tamamlanamadı!!!!!!", 7);
+            }
+        }
+        catch (ApiException ex)
+        {
+            await ModalManager.ShowMessageAsync("Api Exception", ex.Message);
+        }
+        catch (Exception ex)
+        {
+
+            await ModalManager.ShowMessageAsync("Exception", ex.Message);
+        }
+    }
+}

@@ -1,0 +1,262 @@
+﻿@page "/admin/cars/add"
+@page "/admin/cars/edit/{CarId:guid}"
+@layout MainAdminLayout
+@using Blazored.LocalStorage
+@using Microsoft.AspNetCore.SignalR.Client
+@using Morris.Blazor.FluentValidation
+@using Morris.Blazor.Validation
+@using RentACar.Application.CustomExceptions
+@using RentACar.Application.DTOs
+@using RentACar.Application.Validators
+@using RentACar.Client.Utils
+@using RentACar.Domain.Enums
+@using RentACar.Domain.Enums.Helper
+
+<EditForm Model="@carModel" OnValidSubmit="SubmitForm">
+    <Validate ValidationProperties=@(ValidationProperties.Set.FluentValidator<CarValidator>()) OnTransformModel=OnTransformModel />
+    <RadzenColumn Size="12" Style="width:%60" SizeMD="6">
+        <RadzenStack>
+            <RadzenFieldset Text="Ürün Ekleme Sayfası">
+                <RadzenStack Gap="1rem">
+
+                    <RadzenRow AlignItems="AlignItems.Center">
+                        <RadzenColumn Size="12" SizeMD="4">
+                            <RadzenLabel Text="Kilima Var mı ?" />
+                        </RadzenColumn>
+                        <RadzenColumn Size="12" SizeMD="8">
+                            <RadzenSwitch Style="width: 10px;" @bind-Value="carModel.IsAc" Name="IsAc" />
+                            <ValidationMessage For="@(() => carModel.IsAc)" />
+                        </RadzenColumn>
+                    </RadzenRow>
+                    <RadzenRow AlignItems="AlignItems.Center">
+                        <RadzenColumn Size="12" SizeMD="4">
+                            <RadzenLabel Text="Araba Adı" />
+                        </RadzenColumn>
+                        <RadzenColumn Size="12" SizeMD="8">
+                            <RadzenTextBox Style="width: 50%;" @bind-Value="carModel.CarName" Name="CarName" />
+                            <ValidationMessage For="@(() => carModel.CarName)" />
+                        </RadzenColumn>
+
+                    </RadzenRow>
+                    <RadzenRow AlignItems="AlignItems.Center">
+                        <RadzenColumn Size="12" SizeMD="4">
+                            <RadzenLabel Text="Modeli" />
+                        </RadzenColumn>
+                        <RadzenColumn Size="12" SizeMD="8">
+                            <RadzenTextBox Style="width: 50%;" @bind-Value="carModel.CarModel" Name="CarModel" />
+                            <ValidationMessage For="@(() => carModel.CarModel)" />
+                        </RadzenColumn>
+                    </RadzenRow>
+                    <RadzenRow AlignItems="AlignItems.Center">
+                        <RadzenColumn Size="12" SizeMD="4">
+                            <RadzenLabel Text="Kişi Sayısı" />
+                        </RadzenColumn>
+                        <RadzenColumn Size="12" SizeMD="8">
+                            <RadzenTextBox Style="width: 50%;" @bind-Value="carModel.Person" Name="Person" />
+                            <ValidationMessage For="@(() => carModel.Person)" />
+                        </RadzenColumn>
+                    </RadzenRow>
+                    <RadzenRow AlignItems="AlignItems.Center">
+                        <RadzenColumn Size="12" SizeMD="4">
+                            <RadzenLabel Text="Bagaj Kapsitesi" />
+                        </RadzenColumn>
+                        <RadzenColumn Size="12" SizeMD="8">
+                            <RadzenTextBox Style="width: 50%;" @bind-Value="carModel.Luggage" Name="Luggage" />
+                            <ValidationMessage For="@(() => carModel.Luggage)" />
+                        </RadzenColumn>
+                    </RadzenRow>
+                    <RadzenRow AlignItems="AlignItems.Center">
+                        <RadzenColumn Size="12" SizeMD="4">
+                            <RadzenLabel Text="Kapı Sayısı" />
+                        </RadzenColumn>
+                        <RadzenColumn Size="12" SizeMD="8">
+                            <RadzenNumeric Style="width: 50%;" @bind-Value="carModel.Door" Name="Door" />
+                            <ValidationMessage For="@(() => carModel.Door)" />
+                        </RadzenColumn>
+                    </RadzenRow>
+                    <RadzenRow AlignItems="AlignItems.Center">
+                        <RadzenColumn Size="12" SizeMD="4">
+                            <RadzenLabel Text="Vites Türü" />
+                        </RadzenColumn>
+                        <RadzenColumn Size="12" SizeMD="8">
+                            <RadzenTextBox Style="width: 50%;" @bind-Value="carModel.gear" Name="gear" />
+                            <ValidationMessage For="@(() => carModel.gear)" />
+                        </RadzenColumn>
+                    </RadzenRow>
+                    <RadzenRow AlignItems="AlignItems.Center">
+                        <RadzenColumn Size="12" SizeMD="4">
+                            <RadzenLabel Text="Yakıt Türü" />
+                        </RadzenColumn>
+
+                        <RadzenColumn Size="12" SizeMD="8">
+                            <RadzenDropDown @bind-Value="carModel.FuelType" AllowClear="true" Placeholder="seçim yapınız" Data="@FuelTypes" Style="width: 50%;" TextProperty="Name" ValueProperty="Id" Name="Id">
+                            </RadzenDropDown>
+                            <ValidationMessage For="@(() => carModel.FuelType)" />
+                        </RadzenColumn>
+                    </RadzenRow>
+                    <RadzenRow AlignItems="AlignItems.Center">
+                        <RadzenColumn Size="12" SizeMD="4">
+                            <RadzenLabel Text="Araba Yaşı" />
+                        </RadzenColumn>
+                        <RadzenColumn Size="12" SizeMD="8">
+                            <RadzenTextBox Style="width: 50%;" @bind-Value="carModel.CarYear" Name="CarYear" />
+                            <ValidationMessage For="@(() => carModel.CarYear)" />
+                        </RadzenColumn>
+                    </RadzenRow>
+                    <RadzenRow AlignItems="AlignItems.Center">
+                        <RadzenColumn Size="12" SizeMD="4">
+                            <RadzenLabel Text="Sürücü Ehliyet Yaşı" />
+                        </RadzenColumn>
+                        <RadzenColumn Size="12" SizeMD="8">
+                            <RadzenTextBox Style="width: 50%;" @bind-Value="carModel.DrivingLicense" Name="DrivingLicense" />
+                            <ValidationMessage For="@(() => carModel.DrivingLicense)" />
+                        </RadzenColumn>
+                    </RadzenRow>
+                    <RadzenRow AlignItems="AlignItems.Center">
+                        <RadzenColumn Size="12" SizeMD="4">
+                            <RadzenLabel Text="Depozito Ücreti" />
+                        </RadzenColumn>
+                        <RadzenColumn Size="12" SizeMD="8">
+                            <RadzenNumeric Style="width: 50%;" @bind-Value="carModel.Depozit" Name="Depozit" />
+                            <ValidationMessage For="@(() => carModel.Depozit)" />
+                        </RadzenColumn>
+                    </RadzenRow>
+                    <RadzenRow AlignItems="AlignItems.Center">
+                        <RadzenColumn Size="12" SizeMD="4">
+                            <RadzenLabel Text="Fiyat" />
+                        </RadzenColumn>
+                        <RadzenColumn Size="12" SizeMD="8">
+                            <RadzenNumeric Style="width: 50%;" @bind-Value="carModel.CarPrice" Name="CarPrice" />
+                            <ValidationMessage For="@(() => carModel.CarPrice)" />
+                        </RadzenColumn>
+                    </RadzenRow>
+                    <RadzenRow AlignItems="AlignItems.Center">
+                        <RadzenColumn Size="12" SizeMD="4">
+                            <RadzenLabel Text="Toplam Km" />
+                        </RadzenColumn>
+                        <RadzenColumn Size="12" SizeMD="8">
+                            <RadzenNumeric Style="width: 50%;" @bind-Value="carModel.TotalKm" Name="TotalKm" />
+                            <ValidationMessage For="@(() => carModel.TotalKm)" />
+                        </RadzenColumn>
+                    </RadzenRow>
+
+                    <RadzenRow AlignItems="AlignItems.Center">
+                        <RadzenColumn Size="12" SizeMD="4">
+                            <RadzenLabel Text="Fotoğraf" />
+                        </RadzenColumn>
+                        <RadzenColumn Size="12" SizeMD="8">
+                            <RadzenFileInput @bind-Value=@carModel.Photo @bind-FileName=@fileName @bind-FileSize=@fileSize TValue="string" class="w-50" />
+                        </RadzenColumn>
+                    </RadzenRow>
+                </RadzenStack>
+            </RadzenFieldset>
+        </RadzenStack>
+    </RadzenColumn>
+    <RadzenStack Orientation="Orientation.Horizontal" JustifyContent="JustifyContent.Center" Gap="1rem" Class="rz-mt-8 rz-mb-4">
+        <RadzenButton ButtonType="ButtonType.Submit" Size="ButtonSize.Large" Icon="save" Text="Kaydet" />
+        <RadzenButton ButtonStyle="ButtonStyle.Light" Variant="Variant.Flat" Size="ButtonSize.Large" Icon="cancel" Text="Geri Dön" Click="@goBackGroupList" />
+    </RadzenStack>
+</EditForm>
+
+@code {
+    [Parameter]
+    public Guid CarId { get; set; }
+    [Inject]
+    public HttpClient HttpClient { get; set; }
+
+    [Inject]
+    public ModalManager ModalManager { get; set; }
+
+    [Inject]
+    public NavigationManager NavigationManager { get; set; }
+    [Inject]
+    ILocalStorageService localStorageService { get; set; }
+    string fileName;
+    long? fileSize;
+    private CarDTO carModel = new CarDTO();
+    List<EnumToName> FuelTypes = new List<EnumToName>();
+    private HubConnection _hubConnection;
+    protected async override Task OnInitializedAsync()
+    {
+
+        foreach (FuelType item in Enum.GetValues(typeof(FuelType)))
+        {
+            FuelTypes.Add(new EnumToName { Name = item.ToString(), Id = item });
+        }
+
+        if (CarId != null && CarId != Guid.Empty)
+        {
+            string token = await localStorageService.GetItemAsStringAsync("token");
+            carModel = await HttpClient.GetServiceResponseAsync<CarDTO>("api/car/CarById/" + CarId, token, true);
+        }
+        var hub = NavigationManager.ToAbsoluteUri("/signalrhub");
+        _hubConnection = new HubConnectionBuilder().WithUrl(hub).Build();
+
+        await _hubConnection.StartAsync();
+
+    }
+    async Task editOrUpdate(CarDTO carDTO)
+    {
+
+        try
+        {
+
+            String url = "api/car/create";
+            carModel = carDTO;
+            // Update
+            if (CarId != null && CarId != Guid.Empty)
+            {
+                url = "api/car/update";
+                carModel.UpdatedDate = DateTime.Now;
+                carModel.UpdatedUser = await localStorageService.GetItemAsStringAsync("email");
+            }
+            else
+            {
+                carModel.CreateDate = DateTime.Now;
+                carModel.CreatedUser = await localStorageService.GetItemAsStringAsync("email");
+            }
+            string token = await localStorageService.GetItemAsStringAsync("token");
+
+            carModel = await HttpClient.PostGetServiceResponseAsync<CarDTO, CarDTO>(url, carModel, token, true);
+            if (IsConnected) await SenMessage();
+
+            NavigationManager.NavigateTo("/admin/cars");
+        }
+        catch (ApiException ex)
+        {
+            await ModalManager.ShowMessageAsync("Api Exception", ex.Message);
+        }
+        catch (Exception ex)
+        {
+            await ModalManager.ShowMessageAsync("Exception", ex.Message);
+        }
+
+
+
+
+    }
+    Task SenMessage() => _hubConnection.SendAsync("SendMessage");
+    public bool IsConnected => _hubConnection.State == HubConnectionState.Connected;
+    async Task SubmitForm(EditContext editContext)
+    {
+        if (editContext.Validate())
+        {
+            await editOrUpdate((CarDTO)editContext.Model);
+        }
+    }
+    public void Dispose()
+    {
+        _ = _hubConnection.DisposeAsync();
+    }
+    void goBackGroupList()
+    {
+        NavigationManager.NavigateTo("/admin/cars");
+    }
+    private object OnTransformModel(object model)
+    {
+        // Confirm that the model is of the expected type
+        // Do transformations here
+        // return the transformed model
+        return model;
+    }
+}

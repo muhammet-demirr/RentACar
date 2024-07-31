@@ -1,0 +1,110 @@
+@using Blazored.LocalStorage
+@using Morris.Blazor.FluentValidation
+@using Morris.Blazor.Validation
+@using RentACar.Application.CustomExceptions
+@using RentACar.Application.DTOs
+@using RentACar.Application.DTOs.OtherDTOs
+@using RentACar.Application.Validators
+@using RentACar.Client.Utils
+<section id="contact" class="container wow bounceInUp" data-wow-offset="50">
+    <div class="row">
+        <div class="col-md-12">
+            <h2>Ýletiþim</h2>
+        </div>
+
+        <div class="col-md-12 col-xs-12 pull-left">
+            <p class="contact-info">
+                Herhangi bir sorunuz varsa veya ek bilgiye ihtiyacýnýz varsa mesaj gönderin <br>
+                <span class="address"><span class="highlight">Adres:</span> Aydýnlý, Didem Sk. , 34953 Tuzla/Ýstanbul</span>
+            </p>
+            <EditForm  id="contact-form" Model=@email OnValidSubmit="SubmitForm" name="contact-form">
+                   <Validate ValidationProperties=@(ValidationProperties.Set.FluentValidator<EmailValidator>()) OnTransformModel=OnTransformModel />
+                <input type="hidden" name="action" value="send_contact_form" />
+
+                <div class="alert hidden" id="contact-form-msg"></div>
+
+                <div class="form-group">
+                    <input type="text" @bind-value="email.Name" class="form-control first-name text-field" name="first-name" placeholder="Ad">
+                    <ValidationMessage For="@(() => email.Name)" />
+                    <input type="text" @bind-value="email.SurName" class="form-control last-name text-field" name="last-name" placeholder="Soyad">
+                    <div class="clearfix"></div>
+                    <ValidationMessage For="@(() => email.SurName)" />
+                </div>
+
+                <div class="form-group">
+                    <input type="tel" @bind-value="email.Phone" class="form-control telephone text-field" name="telephone" placeholder="Telefon:">
+                    <ValidationMessage For="@(() => email.Phone)" />
+                </div>
+
+                <div class="form-group">
+                    <input type="email" @bind-value="email.Email" class="form-control email text-field" name="email" placeholder="Email:">
+                    <ValidationMessage For="@(() => email.Email)" />
+                </div>
+
+                <div class="form-group">
+                    <textarea class="form-control message"  @bind="email.Message" name="message" placeholder="Message:"></textarea>
+                    <ValidationMessage For="@(() => email.Message)" />
+                </div>
+
+                <input type="submit" class="btn submit-message" name="submit-message" value="Gönder">
+
+
+            </EditForm>
+        </div>
+
+    </div>
+</section>
+
+@code {
+    private EmailDTO email = new();
+    private MailSenderDTO mailsender = new();
+    [Inject]
+    public HttpClient HttpClient { get; set; }
+
+    [Inject]
+    public ModalManager ModalManager { get; set; }
+
+    [Inject]
+    public NavigationManager NavigationManager { get; set; }
+    [Inject]
+    ILocalStorageService localStorageService { get; set; }
+
+
+    async Task editOrUpdate(EmailDTO emailDTO)
+    {
+
+        try
+        {
+            email = emailDTO;
+            mailsender.SenderMail = "icb1742@gmail.com";
+            mailsender.Subject = "Müþteri Mesajý";
+            mailsender.Content = $"<div></br><div class='row'><div class='col'><h3>Ad</h3></div><div class='col'><p>{email.Name}</p></div></div> <div class='row'><div class='col'><h3>Soyisim</h3></div><div class='col'><p>{email.SurName}</p></div></div><div class='row'><div class='col'><h3>Telefon No</h3></div> <div class='col'><p>{email.Phone}</p></div></div><div class='row'><div class='col'><h3>Email</h3></div><div class='col'><p>{email.Email}</p></div></div><div class='row'><div class='col'><h3>Mesaj</h3></div><div class='col'><p>{email.Message}</p></div></div></div>";
+            mailsender = await HttpClient.PostGetServiceResponseNullTokenAsync<MailSenderDTO, MailSenderDTO>("api/Reserve/EmailSender", mailsender, true);
+            await ModalManager.ShowMessageAsync("Mesaj", "Mail göderildi teþþekür ederiz.");
+           await Task.Delay(4000);
+            NavigationManager.NavigateTo("/", true);
+        }
+        catch (ApiException ex)
+        {
+            await ModalManager.ShowMessageAsync("Api Exception", ex.Message);
+        }
+        catch (Exception ex)
+        {
+            await ModalManager.ShowMessageAsync("Exception", ex.Message);
+        }
+    }
+    async Task SubmitForm(EditContext editContext)
+    {
+        if (editContext.Validate())
+        {
+            await editOrUpdate((EmailDTO)editContext.Model);
+        }
+    }
+    private object OnTransformModel(object model)
+    {
+        // Confirm that the model is of the expected type
+        // Do transformations here
+        // return the transformed model
+        return model;
+    }
+}

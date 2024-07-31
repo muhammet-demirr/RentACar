@@ -1,0 +1,112 @@
+﻿@page "/admin/Locations"
+@using Blazored.LocalStorage
+@using RentACar.Application.CustomExceptions
+@using RentACar.Application.DTOs
+@using RentACar.Client.Utils
+@using RentACar.Domain.Models
+@layout MainAdminLayout
+
+<RadzenButton Shade="Shade.Dark" Click=goCreateLocationPage Icon="add" Variant="Variant.Flat" Text="Lokasyon Ekle" ButtonStyle="ButtonStyle.Success" />
+
+
+<RadzenDataGrid AllowFiltering="true"
+                FilterMode="FilterMode.Simple"
+                ShowCellDataAsTooltip="true"
+                ColumnWidth="200px"
+                FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive"
+                AllowColumnPicking="true"
+                AllowPaging="true" PageSize="10"
+                AllowSorting="true" Data="@Locations"
+                TItem="LocationDTO">
+    <Columns>
+        <RadzenDataGridColumn TItem="LocationDTO" Context="Location" Filterable="false" Sortable="false" TextAlign="TextAlign.Right" Width="156px">
+            <Template Context="Location">
+                <RadzenButton Icon="edit" ButtonStyle="ButtonStyle.Light" Variant="Variant.Flat" Size="ButtonSize.Medium" Click="@(() => goUpdateLocationPage(Location.Id))">
+                </RadzenButton>
+                <RadzenButton ButtonStyle="ButtonStyle.Danger" Icon="delete" Variant="Variant.Flat" Shade="Shade.Lighter" Size="ButtonSize.Medium" class="my-1 ms-1" Click="@(() => DeleteLocation(Location.Id))">
+                </RadzenButton>
+            </Template>
+        </RadzenDataGridColumn>
+
+        
+        <RadzenDataGridColumn TItem="LocationDTO" Property="City" Title="Şehir" />
+
+        <RadzenDataGridColumn TItem="LocationDTO" Property="Decription" Title="Lokasyon adresi" />
+
+    </Columns>
+</RadzenDataGrid>
+
+@code {
+    [Inject]
+    public HttpClient Client { get; set; }
+
+    [Inject]
+    ModalManager ModalManager { get; set; }
+
+    [Inject]
+    NavigationManager NavigationManager { get; set; }
+    [Inject]
+    ILocalStorageService localStorageService { get; set; }
+
+    protected IEnumerable<LocationDTO> Locations;
+
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadList();
+
+    }
+    protected async Task LoadList()
+    {
+        try
+        {
+            string token = await localStorageService.GetItemAsStringAsync("token");
+            Locations = await Client.GetServiceResponseAsync<List<LocationDTO>>("/api/Locatio/Locations", token);
+        }
+        catch (ApiException ex)
+        {
+            await ModalManager.ShowMessageAsync("Api Exception", ex.Message);
+        }
+        catch (Exception ex)
+        {
+
+            await ModalManager.ShowMessageAsync("Exception Exception", ex.Message);
+        }
+    }
+    protected void goCreateLocationPage()
+    {
+        NavigationManager.NavigateTo("/admin/Locations/add");
+    }
+    protected void goUpdateLocationPage(Guid Id)
+    {
+        NavigationManager.NavigateTo("/admin/Locations/edit/" + Id);
+    }
+    protected async Task DeleteLocation(Guid Id)
+    {
+        bool confirmed = await ModalManager.ConfirmationAsync("Silme İşlemi", " Locasyonu silmek istediğinize eminmisiniz ?");
+        if (!confirmed) return;
+        try
+        {
+            string token = await localStorageService.GetItemAsStringAsync("token");
+            bool deleted = await Client.PostGetServiceResponseAsync<bool, Guid>("/api/Locatio/delete", Id, token);
+            if (deleted)
+            {
+                await ModalManager.ShowMessageAsync("Bildirim", "Silme İşlemi Tamamlandı", 4);
+                NavigationManager.NavigateTo("/admin/Locations", true);
+            }
+            else
+            {
+                await ModalManager.ShowMessageAsync("Bildirim", "Silme İşlemi Tamamlanamadı!!!!!!", 7);
+            }
+        }
+        catch (ApiException ex)
+        {
+            await ModalManager.ShowMessageAsync("Api Exception", ex.Message);
+        }
+        catch (Exception ex)
+        {
+
+            await ModalManager.ShowMessageAsync("Exception", ex.Message);
+        }
+    }
+}

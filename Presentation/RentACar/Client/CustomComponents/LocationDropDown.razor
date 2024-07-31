@@ -1,0 +1,109 @@
+﻿@using RentACar.Application.CustomExceptions
+@using RentACar.Application.DTOs
+@using RentACar.Client.Utils
+@if (supplierList == null)
+{
+    <p>
+        <em>
+            @loadingMessage
+        </em>
+    </p>
+}
+else
+{
+
+    <BlazoredTypeahead SearchMethod="@searchSupplier"
+                       TValue="LocationDTO"
+                       TItem="LocationDTO"
+                       Value="selectedSupplier"
+                       ValueChanged="SelectedSupplierChanged"
+                       ValueExpression="@(() => selectedSupplier)"
+                       placeholder=" Lokasyon Ara"
+                       MinimumLength="3"
+                       MaximumSuggestions="10"
+                       style="max-width:230px;word-wrap:break-word"
+                       ShowDropDownOnFocus="true"
+                       EnableDropDown="true"
+                       DisableClear=false>
+        <SelectedTemplate>
+
+            
+                <span class="glyphicon glyphicon-map-marker"></span>   @context.Decription (@context.City.ToString())
+            
+
+
+        </SelectedTemplate>
+        <ResultTemplate>
+
+           
+         
+                <span class="glyphicon glyphicon-map-marker"></span>   @context.Decription (@context.City.ToString())
+      
+
+        </ResultTemplate>
+        <NotFoundTemplate>
+            Sorry, there weren't any search results.
+        </NotFoundTemplate>
+    </BlazoredTypeahead>
+
+
+
+
+}
+
+
+
+
+
+@code {
+
+    [Parameter]
+    public Guid Value { get; set; }
+
+    [Parameter]
+    public EventCallback<Guid> ValueChanged { get; set; }
+
+    [Inject]
+    HttpClient Client { get; set; }
+
+    List<LocationDTO> supplierList;
+    LocationDTO selectedSupplier = new LocationDTO();
+
+    String loadingMessage = "Yükleniyor...";
+
+    protected async override Task OnInitializedAsync()
+    {
+        try
+        {
+
+            supplierList = await Client.GetServiceResponseNullTokenAsync<List<LocationDTO>>("api/Locatio/Locations");
+
+            if (Value != null)
+                selectedSupplier = supplierList.FirstOrDefault(i => i.Id == Value);
+
+        }
+        catch (ApiException)
+        {
+            loadingMessage = "Yükleme Başarısız";
+        }
+    }
+
+    private Task SelectedSupplierChanged(LocationDTO Supplier)
+    {
+        if (Supplier == null)
+        {
+            return ValueChanged.InvokeAsync(Guid.Empty);
+        }
+
+        selectedSupplier = Supplier;
+        Value = Supplier.Id;
+
+        return ValueChanged.InvokeAsync(Supplier.Id);
+    }
+
+
+    async Task<IEnumerable<LocationDTO>> searchSupplier(string searchText)
+    {
+        return await Task.FromResult(supplierList.Where(i => i.Decription.ToUpper().Contains(searchText.ToUpper())).ToList());
+    }
+}

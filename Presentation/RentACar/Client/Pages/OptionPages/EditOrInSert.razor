@@ -1,0 +1,155 @@
+﻿@page "/admin/options/add"
+@page "/admin/options/edit/{OptionId:guid}"
+@layout MainAdminLayout
+@using Blazored.LocalStorage
+@using Morris.Blazor.FluentValidation
+@using Morris.Blazor.Validation
+@using RentACar.Application.CustomExceptions
+@using RentACar.Application.DTOs
+@using RentACar.Application.Validators
+@using RentACar.Client.Utils
+@using RentACar.Domain.Enums
+@using RentACar.Domain.Enums.Helper
+
+
+<EditForm Model="@option" OnValidSubmit="SubmitForm">
+    <Validate ValidationProperties=@(ValidationProperties.Set.FluentValidator<OptionValidator>()) OnTransformModel=OnTransformModel />
+    <RadzenColumn Size="12" Style="width:%60" SizeMD="6">
+        <RadzenStack>
+            <RadzenFieldset Text="Seçenek Ekleme Sayfası">
+                <RadzenStack Gap="1rem">
+
+
+                    <RadzenRow AlignItems="AlignItems.Center">
+                        <RadzenColumn Size="12" SizeMD="4">
+                            <RadzenLabel Text="Seçenek" />
+                        </RadzenColumn>
+                        <RadzenColumn Size="12" SizeMD="8">
+                            <RadzenTextBox Style="width: 50%;" @bind-Value="option.OpsiyonName" Name="OpsiyonName" />
+                            <ValidationMessage For="@(() => option.OpsiyonName)" />
+                        </RadzenColumn>
+
+                    </RadzenRow>
+                    <RadzenRow AlignItems="AlignItems.Center">
+                        <RadzenColumn Size="12" SizeMD="4">
+                            <RadzenLabel Text="Seçenek Fiyatı" />
+                        </RadzenColumn>
+                        <RadzenColumn Size="12" SizeMD="8">
+                            <RadzenNumeric Style="width: 50%;" @bind-Value="option.OpsiyonPrice" Name="OpsiyonPrice" />
+                            <ValidationMessage For="@(() => option.OpsiyonPrice)" />
+                        </RadzenColumn>
+                    </RadzenRow>
+
+
+                    @*                     <RadzenRow AlignItems="AlignItems.Center">
+                    <RadzenColumn Size="12" SizeMD="4">
+                    <RadzenLabel Text="Expiry Date" />
+                    </RadzenColumn>
+                    <RadzenColumn Size="12" SizeMD="8">
+                    <RadzenDatePicker Style="width: 100%;" Name="ExpiryDate" @bind-Value="order.ExpiryDate" />
+                    </RadzenColumn>
+                    </RadzenRow>
+                    <RadzenRow AlignItems="AlignItems.Center">
+                    <RadzenColumn Size="12" SizeMD="4">
+                    <RadzenLabel Text="Cardholder" />
+                    </RadzenColumn>
+                    <RadzenColumn Size="12" SizeMD="8">
+                    <RadzenTextBox Style="width: 100%;" Name="CardHolder" />
+                    </RadzenColumn>
+                    </RadzenRow> *@
+                </RadzenStack>
+            </RadzenFieldset>
+        </RadzenStack>
+    </RadzenColumn>
+    <RadzenStack Orientation="Orientation.Horizontal" JustifyContent="JustifyContent.Center" Gap="1rem" Class="rz-mt-8 rz-mb-4">
+        <RadzenButton ButtonType="ButtonType.Submit" Size="ButtonSize.Large" Icon="save" Text="Kaydet" />
+        <RadzenButton ButtonStyle="ButtonStyle.Light" Variant="Variant.Flat" Size="ButtonSize.Large" Icon="cancel" Text="Geri Dön" Click="@goBackGroupList" />
+    </RadzenStack>
+</EditForm>
+
+
+@code {
+    [Parameter]
+    public Guid OptionId { get; set; }
+    [Inject]
+    public HttpClient HttpClient { get; set; }
+
+    [Inject]
+    public ModalManager ModalManager { get; set; }
+
+    [Inject]
+    public NavigationManager NavigationManager { get; set; }
+    [Inject]
+    ILocalStorageService localStorageService { get; set; }
+
+    private OptionDTO option = new OptionDTO();
+
+    protected async override Task OnInitializedAsync()
+    {
+
+        if (OptionId != null && OptionId != Guid.Empty)
+        {
+            string token = await localStorageService.GetItemAsStringAsync("token");
+            option = await HttpClient.GetServiceResponseAsync<OptionDTO>("api/Option/OptionBy/" + OptionId, token, true);
+        }
+
+
+    }
+    async Task editOrUpdate(OptionDTO optionDTO)
+    {
+
+        try
+        {
+
+            String url = "api/Option/create";
+            option = optionDTO;
+            // Update
+            if (OptionId != null && OptionId != Guid.Empty)
+            {
+                url = "api/Option/update";
+                option.UpdatedDate = DateTime.Now;
+                option.UpdatedUser = await localStorageService.GetItemAsStringAsync("email");
+            }
+            else
+            {
+                option.CreateDate = DateTime.Now;
+                option.CreatedUser = await localStorageService.GetItemAsStringAsync("email");
+            }
+            string token = await localStorageService.GetItemAsStringAsync("token");
+
+            option = await HttpClient.PostGetServiceResponseAsync<OptionDTO, OptionDTO>(url, option, token, true);
+
+            NavigationManager.NavigateTo("/admin/options");
+        }
+        catch (ApiException ex)
+        {
+            await ModalManager.ShowMessageAsync("Api Exception", ex.Message);
+        }
+        catch (Exception ex)
+        {
+            await ModalManager.ShowMessageAsync("Exception", ex.Message);
+        }
+
+
+
+
+    }
+    async Task SubmitForm(EditContext editContext)
+    {
+        if (editContext.Validate())
+        {
+            await editOrUpdate((OptionDTO)editContext.Model);
+        }
+    }
+    void goBackGroupList()
+    {
+        NavigationManager.NavigateTo("/admin/options");
+    }
+    private object OnTransformModel(object model)
+    {
+        // Confirm that the model is of the expected type
+        // Do transformations here
+        // return the transformed model
+        return model;
+    }
+}

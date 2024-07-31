@@ -1,0 +1,260 @@
+﻿@inject DialogService DialogService
+@using Morris.Blazor.FluentValidation
+@using Morris.Blazor.Validation
+@using RentACar.Application.DTOs
+@using Pages
+@using RentACar.Application.DTOs.OtherDTOs
+@using RentACar.Application.Validators
+@using RentACar.Client.Utils
+<section id="teaser" style="background-image:url(/website/teaserbackground.jpg); background-repeat: no-repeat;
+  background-attachment: fixed;
+background-size:contain;
+">
+    <div class="container">
+        <h1 class="title">
+            Araç Kirala
+
+        </h1>
+
+        <RadzenStack Orientation="Orientation.Horizontal" Wrap="FlexWrap.Wrap" JustifyContent="JustifyContent.Center" Class="shadows rz-p-12">
+            <div class="rz-shadow-12 rz-p-12 rz-text-align-left" style="font-size:small;background-color:rgba(192,192,192,0.5);border-radius:15px">
+
+                <EditForm Model="carRezervations" OnValidSubmit="SubmitForm">
+                    <Morris.Blazor.Validation.Validate ValidationProperties=@(ValidationProperties.Set.FluentValidator<CarRezervationValidator>()) OnTransformModel=OnTransformModel />
+
+                    <RadzenRow Style="flex:none">
+                        <RadzenColumn Size="12" SizeSM="4">
+                            <RadzenStack>
+
+                                <RadzenFormField Text="Alış Lokasyonu" Variant="@variant">
+
+                                    <Start>
+                                        <RadzenIcon Icon="language" />
+                                    </Start>
+                                    <ChildContent>
+                                        <RadzenDropDown class="form-control autocomplete-location" AllowClear="true" @bind-Value=carRezervations.LocationStartId AllowVirtualization="true" Name="Location"
+                                                        AllowFiltering="true" Data=@customers TextProperty="Decription" ValueProperty="Id"  Placeholder="Alış Lokasyonu Ara" />
+
+                                    </ChildContent>
+
+                                </RadzenFormField>
+                                <RadzenRow>
+                                    <RadzenColumn>
+                                        <ValidationMessage For="@(() => carRezervations.LocationStartId)" />
+                                    </RadzenColumn>
+
+                                </RadzenRow>
+                                <RadzenRow>
+                                    <RadzenColumn Style="flex:none;padding:0px;margin:0px;text-align:left">
+                                        <RadzenCheckBox @bind-Value=isActive Name="CheckBox1" />
+                                    </RadzenColumn>
+                                    <RadzenColumn Style="flex:none;margin:0px">
+                                        <RadzenLabel Text="Bırakacağım Konum" Component="CheckBox1" Style=" font-size:x-small;text-align:left;color:white" />
+
+                                    </RadzenColumn>
+                                </RadzenRow>
+                                <RadzenFormField Visible="isActive" Text="Bırakılacak Lokasyon" Variant="@variant">
+                                    <Start>
+                                        <RadzenIcon Icon="language" />
+                                    </Start>
+                                    <ChildContent>
+                                        <RadzenDropDown class="form-control autocomplete-location" AllowClear="true" @bind-Value=carRezervations.LocationEndId AllowVirtualization="true" Name="Location"
+                                                        AllowFiltering="true" Data=@customers Placeholder="Bırakılacak Lokasyon Ara" TextProperty="Decription" ValueProperty="Id" />
+
+
+                                    </ChildContent>
+
+
+
+                                </RadzenFormField>
+                                <RadzenRow>
+                                    <RadzenColumn>
+                                        <ValidationMessage For="@(() => carRezervations.LocationEndId)" />
+                                    </RadzenColumn>
+
+                                </RadzenRow>
+
+                            </RadzenStack>
+
+
+
+
+                        </RadzenColumn>
+
+                        <RadzenColumn Size="12" SizeSM="4">
+                            <RadzenStack>
+                                <RadzenFormField Text="Alış Tarih & Saat" Variant="@variant">
+
+
+                                    <RadzenDatePicker class="form-control datepicker" @bind-Value=carRezervations.StartDate ShowTime="true" HourFormat="24" Min="DateTime.Now.Date" DateFormat="dd/MM/yyyy HH:mm" Name="DatePickerHourFormat" />
+
+
+
+                                </RadzenFormField>
+                                <RadzenRow>
+                                    <RadzenColumn>
+                                        <ValidationMessage For="@(() => carRezervations.StartDate)" />
+                                    </RadzenColumn>
+
+                                </RadzenRow>
+                            </RadzenStack>
+
+
+                        </RadzenColumn>
+                        <RadzenColumn Size="12" SizeSM="4">
+                            <RadzenStack>
+                                <RadzenFormField Text="Bırakış Tarih & Saat" Variant="@variant">
+
+
+                                    <RadzenDatePicker class="form-control datepicker" @bind-Value=carRezervations.EndDate ShowTime="true" Min="DateTime.Now.Date.AddDays(1)" HourFormat="24" DateFormat="dd/MM/yyyy HH:mm" Name="DatePickerHourFormat" />
+
+
+
+                                </RadzenFormField>
+                                <RadzenButton type="submit" Style="background-color:#f86207" Variant="Variant.Flat" Text="Araç Listele" />
+                                <RadzenRow>
+                                    <RadzenColumn>
+                                        <ValidationMessage For="@(() => carRezervations.EndDate)" />
+                                    </RadzenColumn>
+
+                                </RadzenRow>
+                            </RadzenStack>
+
+
+                        </RadzenColumn>
+
+                    </RadzenRow>
+                    @*                     <div class="col-md-3 col-xs-3">
+                    <div class="location">
+                    <div class="row">
+                    <span class="input-group-addon"><span class="glyphicon glyphicon-map-marker"></span>  Pick-up</span>
+
+                    </div>
+                    <div class="row">
+                    <div class="rz-p-12 rz-text-align-center">
+                    <RentACar.Client.CustomComponents.LocationDropDown @bind-Value="asd" @bind-Value:event="ValueChanged" />
+                    </div>
+                    </div>
+                    </div>
+                    </div>
+
+                    <div class="col-md-3 col-xs-3">
+                    <div class="location">
+                    <div class="row">
+                    <span class="input-group-addon"><span class="glyphicon glyphicon-map-marker"></span>  Pick-up</span>
+
+                    </div>
+                    <div class="row">
+                    <div class="rz-p-12 rz-text-align-center">
+                    <RentACar.Client.CustomComponents.LocationDropDown @bind-Value="dropOff" @bind-Value:event="ValueChanged" />
+
+                    </div>
+                    </div>
+                    </div>
+                    </div>
+
+                    <div class="col-md-3 col-xs-3">
+                    <div class="datetime pick-up">
+                    <div class="date pull-left">
+                    <div class="input-group">
+                    <div class="row">
+                    <span class="input-group-addon pixelfix"><span class="glyphicon glyphicon-calendar"></span> Pick-up</span>
+
+                    </div>
+                    <div class="row">
+                    <div class="rz-p-12 rz-text-align-center">
+                    <RadzenDatePicker @bind-Value=@value ShowTime="true" HourFormat="12" DateFormat="MM/dd/yyyy h:mm tt" Name="DatePickerHourFormat" />
+                    </div>
+
+                    </div>
+                    </div>
+                    </div>
+                    </div>
+                    </div>
+                    <div class="col-md-3 col-xs-3">
+                    <div class="datetime pick-up">
+                    <div class="date pull-left">
+                    <div class="input-group">
+                    <div class="row">
+                    <span class="input-group-addon pixelfix"><span class="glyphicon glyphicon-calendar"></span> Pick-up</span>
+
+                    </div>
+                    <div class="row">
+                    <div class="rz-p-12 rz-text-align-center">
+                    <RadzenDatePicker @bind-Value=@value ShowTime="true" HourFormat="12" DateFormat="MM/dd/yyyy h:mm tt" Name="DatePickerHourFormat" />
+                    </div>
+                    </div>
+                    </div>
+                    </div>
+                    </div>
+                    </div>
+                    *@
+                    @*          <input type="submit" class="submit" name="submit" value="continue car reservation" id="checkoutModalLabel"> *@
+                </EditForm>
+
+            </div>
+        </RadzenStack>
+
+
+    </div>
+</section>
+<style>
+    .shadows div {
+        text-align: center;
+    }
+</style>
+@code {
+
+    [Inject]
+    HttpClient Client { get; set; }
+    CarReservationDTO carRezervations = new CarReservationDTO();
+    Variant variant = Variant.Outlined;
+    List<LocationDTO> customers = new List<LocationDTO>();
+    bool isActive = false;
+    protected override async Task OnInitializedAsync()
+    {
+        customers = await Client.GetServiceResponseNullTokenAsync<List<LocationDTO>>("api/Locatio/Locations");
+        carRezervations.LocationStartId =  customers.FirstOrDefault().Id;
+        carRezervations.LocationEndId =  customers.FirstOrDefault().Id;
+        carRezervations.StartDate = DateTime.Now;
+        carRezervations.EndDate = DateTime.Now.AddDays(1);
+
+    }
+    public async Task OpenOrder(CarReservationDTO carReservation)
+    {
+        carRezervations = carReservation;
+        await DialogService.OpenAsync("Araç Rezervasyon Ekranı", ds =>
+        @<CarRezervation startlocation="carRezervations.LocationStartId"
+                endlocation="carRezervations.LocationEndId"
+                startdate="carRezervations.StartDate"
+                enddate="carRezervations.EndDate" />,
+        new DialogOptions() { CloseDialogOnEsc = true, Width = "100%", Height = "90%", ShowClose = true, Resizable = false, AutoFocusFirstElement = true, Draggable = true, ShowTitle = true });
+    }
+    private object OnTransformModel(object model)
+    {
+        // Confirm that the model is of the expected type
+        // Do transformations here
+        // return the transformed model
+        return model;
+    }
+    async Task SubmitForm(EditContext editContext)
+    {
+        if (editContext.Validate())
+        {
+            await OpenOrder((CarReservationDTO)editContext.Model);
+        }
+    }
+    public void Test()
+    {
+        if (isActive)
+        {
+            isActive = false;
+        }
+        else
+        {
+            isActive = true;
+        }
+    }
+
+
+}

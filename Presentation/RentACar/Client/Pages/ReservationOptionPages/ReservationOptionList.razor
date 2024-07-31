@@ -1,0 +1,115 @@
+﻿@page "/admin/ReservationOptions/{RezervationId:guid}"
+@using Blazored.LocalStorage
+@using RentACar.Application.CustomExceptions
+@using RentACar.Application.DTOs
+@using RentACar.Client.Utils
+@using RentACar.Domain.Models
+@layout MainAdminLayout
+
+<RadzenButton Shade="Shade.Dark" Click=goCreateReservationOptionPage Icon="add" Variant="Variant.Flat" Text="Rezervasyon Seçeneği Ekle" ButtonStyle="ButtonStyle.Success" />
+
+<RadzenDataGrid AllowFiltering="true"
+                FilterMode="FilterMode.Simple"
+                ShowCellDataAsTooltip="true"
+                ColumnWidth="200px"
+                FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive"
+                AllowColumnPicking="true"
+                AllowPaging="true" PageSize="10"
+                AllowSorting="true" Data="@ReservationOptions"
+                TItem="ReservationOptionDTO">
+    <Columns>
+        <RadzenDataGridColumn TItem="ReservationOptionDTO" Context="reservationOption" Filterable="false" Sortable="false" TextAlign="TextAlign.Right" Width="156px">
+            <Template Context="reservationOption">
+                <RadzenButton Icon="edit" ButtonStyle="ButtonStyle.Light" Variant="Variant.Flat" Size="ButtonSize.Medium" Click="@(() => goUpdateReservationOptionPage(reservationOption.Id))">
+                </RadzenButton>
+                <RadzenButton ButtonStyle="ButtonStyle.Danger" Icon="delete" Variant="Variant.Flat" Shade="Shade.Lighter" Size="ButtonSize.Medium" class="my-1 ms-1" Click="@(() => DeleteReservationOption(reservationOption.Id))">
+                </RadzenButton>
+            </Template>
+        </RadzenDataGridColumn>
+
+        <RadzenDataGridColumn TItem="ReservationOptionDTO" Property="OptionName" Title="Seçenek Adı" />
+
+        <RadzenDataGridColumn TItem="ReservationOptionDTO" Property="OptionCount" Title="Seçenek Sayısı" />
+        <RadzenDataGridColumn TItem="ReservationOptionDTO" Property="TotalOptionPrice" Title="Toplam Seçenek Fiyatı" />
+
+        
+
+    </Columns>
+</RadzenDataGrid>
+
+@code {
+    [Parameter]
+    public Guid RezervationId { get; set; }
+    [Inject]
+    public HttpClient Client { get; set; }
+
+    [Inject]
+    ModalManager ModalManager { get; set; }
+
+    [Inject]
+    NavigationManager NavigationManager { get; set; }
+    [Inject]
+    ILocalStorageService localStorageService { get; set; }
+
+    protected IEnumerable<ReservationOptionDTO> ReservationOptions;
+
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadList();
+
+    }
+    protected async Task LoadList()
+    {
+        try
+        {
+            string token = await localStorageService.GetItemAsStringAsync("token");
+            ReservationOptions = await Client.GetServiceResponseNullTokenAsync<List<ReservationOptionDTO>>("/api/ReservationOption/ReservationsOptionsById/"+RezervationId);
+        }
+        catch (ApiException ex)
+        {
+            await ModalManager.ShowMessageAsync("Api Exception", ex.Message);
+        }
+        catch (Exception ex)
+        {
+
+            await ModalManager.ShowMessageAsync("Exception Exception", ex.Message);
+        }
+    }
+    protected void goCreateReservationOptionPage()
+    {
+        NavigationManager.NavigateTo("/admin/reservationOptions/add");
+    }
+    protected void goUpdateReservationOptionPage(Guid Id)
+    {
+        NavigationManager.NavigateTo("/admin/reservationOptions/edit/" + Id);
+    }
+    protected async Task DeleteReservationOption(Guid Id)
+    {
+        bool confirmed = await ModalManager.ConfirmationAsync("Silme İşlemi", "Rezervasyon Seçeneğini silmek istediğinize eminmisiniz ?");
+        if (!confirmed) return;
+        try
+        {
+            string token = await localStorageService.GetItemAsStringAsync("token");
+            bool deleted = await Client.PostGetServiceResponseAsync<bool, Guid>("/api/ReservationOption/delete", Id, token);
+            if (deleted)
+            {
+                await ModalManager.ShowMessageAsync("Bildirim", "Silme İşlemi Tamamlandı", 4);
+                NavigationManager.NavigateTo("/admin/reservationOptions", true);
+            }
+            else
+            {
+                await ModalManager.ShowMessageAsync("Bildirim", "Silme İşlemi Tamamlanamadı!!!!!!", 7);
+            }
+        }
+        catch (ApiException ex)
+        {
+            await ModalManager.ShowMessageAsync("Api Exception", ex.Message);
+        }
+        catch (Exception ex)
+        {
+
+            await ModalManager.ShowMessageAsync("Exception", ex.Message);
+        }
+    }
+}

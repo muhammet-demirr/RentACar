@@ -1,0 +1,84 @@
+@using RentACar.Application.DTOs
+@using RentACar.Client.Utils
+
+<section id="services" >
+    <div class="container">
+        <div class="row">
+            <div class="col-md-12 title">
+                <h2>Hizmetlerimiz</h2>
+                <span class="underline">&nbsp;</span>
+            </div>
+
+            <!-- Service Box start -->
+      
+                @foreach (var service in Services)
+                {
+                    <div class="col-md-6" style="word-wrap:break-word;">
+                        <div class="service-box wow fadeInLeft" style="word-wrap:break-word; height:300px; max-height:300px" data-wow-offset="50">
+                            <div class="service-icon"><i class="@service.Icon" aria-hidden="true"></i></div>
+                            <h3 class="service-title">@service.ServiceName</h3>
+                            <div class="clearfix"></div>
+                            <p class="service-content">@service.ServiceDescription</p>
+                        </div>
+                    </div>
+                }
+        
+       @*   
+            <div class="col-md-6" >
+                <div class="service-box wow fadeInLeft" style="max-width:450px" data-wow-offset="100">
+                    <div class="service-icon"><i class="fa fa-gift" aria-hidden="true"></i></div>
+                    <h3 class="service-title">Special rates on car booking</h3>
+                    <div class="clearfix"></div>
+                    <p class="service-content">Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed  nonumy eirmod tempor invidunt ut labore et dolore magnaed aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren.</p>
+                </div>
+            </div>
+            <!-- Service Box end -->
+            <!-- Service Box start -->
+            <div class="col-md-6" >
+                <div class="service-box wow fadeInRight" style="max-width:450px" data-wow-offset="100">
+                    <div class="service-icon">+</div>
+                    <h3 class="service-title">Mobile Phone Reservation</h3>
+                    <div class="clearfix"></div>
+                    <p class="service-content">Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed  nonumy eirmod tempor invidunt ut labore et dolore magnaed aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren.</p>
+                </div>
+            </div>
+            <!-- Service Box end -->
+            <!-- Service Box start -->
+            <div class="col-md-6" >
+                <div class="service-box wow fadeInLeft" style="max-width:450px" data-wow-offset="100">
+                    <div class="service-icon">+</div>
+                    <h3 class="service-title">Special rates on car booking</h3>
+                    <div class="clearfix"></div>
+                    <p class="service-content">Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed  nonumy eirmod tempor invidunt ut labore et dolore magnaed aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren.</p>
+                </div>
+            </div>
+            <!-- Service Box end -->
+            <!-- Service Box start -->
+            <div class="col-md-6" >
+                <div class="service-box wow fadeInRight" style="max-width:450px" data-wow-offset="100">
+                    <div class="service-icon">+</div>
+                    <h3 class="service-title">Mobile Phone Reservation</h3>
+                    <div class="clearfix"></div>
+                    <p class="service-content">Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed  nonumy eirmod tempor invidunt ut labore et dolore magnaed aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren.</p>
+                </div>
+            </div> *@
+            <!-- Service Box end -->
+
+        </div>
+    </div>
+
+</section>
+
+@code{
+    [Inject]
+    HttpClient Client { get; set; }
+    List<ServiceDTO> Services;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await base.OnInitializedAsync();
+        Services = new List<ServiceDTO>();
+        Services = await Client.GetServiceResponseNullTokenAsync<List<ServiceDTO>>("api/Service/Services");
+
+    }
+ }

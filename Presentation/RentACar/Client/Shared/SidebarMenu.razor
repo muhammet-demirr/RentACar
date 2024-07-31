@@ -1,0 +1,51 @@
+﻿@using Microsoft.AspNetCore.Components.Authorization
+
+
+<RadzenHeader Style="background-color:#f86207">
+    <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="0">
+        <RadzenSidebarToggle Click="@(() => sidebarExpanded = !sidebarExpanded)" />
+        <RadzenLabel Text="Eagle Rent A Car" />
+    </RadzenStack>
+</RadzenHeader>
+<RadzenSidebar Responsive="false" Style="width: max-content">
+
+
+    <RadzenPanelMenu DisplayStyle="@(sidebarExpanded ? MenuItemDisplayStyle.IconAndText : MenuItemDisplayStyle.Icon)" ShowArrow="false">
+        <AuthorizeView>
+
+            <Authorized>
+                <RadzenPanelMenuItem Text="Overview" Icon="home" />
+                <RadzenPanelMenuItem Text="Dashboard" Icon="dashboard" />
+                <RadzenPanelMenuItem Text="Arabalar" Path="/admin/cars" Icon="directions_car" />
+                <RadzenPanelMenuItem Text="Araba Lokasyonları" Path="/admin/carLocations" Icon="map" />
+                <RadzenPanelMenuItem Text="Lokasyonlar" Path="/admin/Locations" Icon="language" />
+                <RadzenPanelMenuItem Text="Seçenekler" Path="/admin/Options" Icon="done" />
+                <RadzenPanelMenuItem Text="Araba Seçenekleri" Path="/admin/CarOptions" Icon="done_all" />
+                <RadzenPanelMenuItem Text="Rezervasyon" Path="/admin/Reservations" Icon="assignment" />
+                <RadzenPanelMenuItem Text="Referanslar" Path="/admin/partners" Icon="favorite_border" />
+                <RadzenPanelMenuItem Text="Hizmet" Path="/admin/Services" Icon="build" />
+                <RadzenPanelMenuItem Text="Hakkımızda" Path="/admin/abouts" Icon="chrome_reader_mode" />
+                <RadzenPanelMenuItem Text="Kullanıcı" Path="/admin/Users" Icon="account_circle" />
+       @*          <RadzenPanelMenuItem Text="UI Fundamentals" Icon="auto_awesome">
+                    <RadzenPanelMenuItem Text="Themes" Icon="color_lens" />
+                    <RadzenPanelMenuItem Text="Colors" Icon="invert_colors" />
+                    
+                </RadzenPanelMenuItem> *@
+                <RadzenPanelMenuItem Text="Çıkış Yap" Path="/logout" Icon="dashboard" />
+            </Authorized>
+
+            <NotAuthorized>
+                <RadzenPanelMenuItem Text="Çıkış Yap" Path="/login" Icon="dashboard" />
+            </NotAuthorized>
+
+        </AuthorizeView>
+    </RadzenPanelMenu>
+
+</RadzenSidebar>
+
+
+
+@code {
+
+    bool sidebarExpanded = true;
+}

@@ -1,0 +1,113 @@
+﻿@page "/admin/Options"
+@using Blazored.LocalStorage
+@using RentACar.Application.CustomExceptions
+@using RentACar.Application.DTOs
+@using RentACar.Client.Utils
+@using RentACar.Domain.Models
+@layout MainAdminLayout
+
+<RadzenButton Shade="Shade.Dark" Click=goCreateOptionPage Icon="add" Variant="Variant.Flat" Text="Seçenek Ekle" ButtonStyle="ButtonStyle.Success" />
+
+
+<RadzenDataGrid AllowFiltering="true"
+                FilterMode="FilterMode.Simple"
+                ShowCellDataAsTooltip="true"
+                ColumnWidth="200px"
+                FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive"
+                AllowColumnPicking="true"
+                AllowPaging="true" PageSize="10"
+                AllowSorting="true" Data="@Options"
+                TItem="OptionDTO">
+    <Columns>
+        <RadzenDataGridColumn TItem="OptionDTO" Context="Option" Filterable="false" Sortable="false" TextAlign="TextAlign.Right" Width="156px">
+            <Template Context="Option">
+                <RadzenButton Icon="edit" ButtonStyle="ButtonStyle.Light" Variant="Variant.Flat" Size="ButtonSize.Medium" Click="@(() => goUpdateOptionPage(Option.Id))">
+                </RadzenButton>
+                <RadzenButton ButtonStyle="ButtonStyle.Danger" Icon="delete" Variant="Variant.Flat" Shade="Shade.Lighter" Size="ButtonSize.Medium" class="my-1 ms-1" Click="@(() => DeleteOption(Option.Id))">
+                </RadzenButton>
+            </Template>
+        </RadzenDataGridColumn>
+
+
+        <RadzenDataGridColumn TItem="OptionDTO" Property="OpsiyonName" Title="Seçenek" />
+
+        <RadzenDataGridColumn TItem="OptionDTO" Property="OpsiyonPrice" Title="Seçenek Fiyatı" />
+
+    </Columns>
+</RadzenDataGrid>
+
+
+@code {
+    [Inject]
+    public HttpClient Client { get; set; }
+
+    [Inject]
+    ModalManager ModalManager { get; set; }
+
+    [Inject]
+    NavigationManager NavigationManager { get; set; }
+    [Inject]
+    ILocalStorageService localStorageService { get; set; }
+
+    protected IEnumerable<OptionDTO> Options;
+
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadList();
+
+    }
+    protected async Task LoadList()
+    {
+        try
+        {
+            string token = await localStorageService.GetItemAsStringAsync("token");
+            Options = await Client.GetServiceResponseAsync<List<OptionDTO>>("/api/Option/Options", token);
+        }
+        catch (ApiException ex)
+        {
+            await ModalManager.ShowMessageAsync("Api Exception", ex.Message);
+        }
+        catch (Exception ex)
+        {
+
+            await ModalManager.ShowMessageAsync("Exception Exception", ex.Message);
+        }
+    }
+    protected void goCreateOptionPage()
+    {
+        NavigationManager.NavigateTo("/admin/Options/add");
+    }
+    protected void goUpdateOptionPage(Guid Id)
+    {
+        NavigationManager.NavigateTo("/admin/Options/edit/" + Id);
+    }
+    protected async Task DeleteOption(Guid Id)
+    {
+        bool confirmed = await ModalManager.ConfirmationAsync("Silme İşlemi", " Seçeneği silmek istediğinize eminmisiniz ?");
+        if (!confirmed) return;
+        try
+        {
+            string token = await localStorageService.GetItemAsStringAsync("token");
+            bool deleted = await Client.PostGetServiceResponseAsync<bool, Guid>("/api/Option/delete", Id, token);
+            if (deleted)
+            {
+                await ModalManager.ShowMessageAsync("Bildirim", "Silme İşlemi Tamamlandı", 4);
+                NavigationManager.NavigateTo("/admin/Options", true);
+            }
+            else
+            {
+                await ModalManager.ShowMessageAsync("Bildirim", "Silme İşlemi Tamamlanamadı!!!!!!", 7);
+            }
+        }
+        catch (ApiException ex)
+        {
+            await ModalManager.ShowMessageAsync("Api Exception", ex.Message);
+        }
+        catch (Exception ex)
+        {
+
+            await ModalManager.ShowMessageAsync("Exception", ex.Message);
+        }
+    }
+}

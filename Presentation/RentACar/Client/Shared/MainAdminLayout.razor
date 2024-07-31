@@ -1,0 +1,46 @@
+﻿@using Blazored.LocalStorage
+@using Microsoft.AspNetCore.Components.Authorization
+@inherits LayoutComponentBase
+<RadzenLayout>
+    <SidebarMenu/>
+    <RadzenBody>
+        <div class="rz-p-4">
+            @Body
+        </div>
+    </RadzenBody>
+    <RadzenFooter Style="background-color:#f86207;color:white;font-size:small">
+         
+            <p class="copyright">©2024 Eagle Rent A Car, Tüm Hakları Saklıdır</p>
+           
+    </RadzenFooter>
+</RadzenLayout>
+@code
+{
+    [CascadingParameter]
+    protected Task<AuthenticationState> AuthState { get; set; }
+
+    [Inject]
+    ILocalStorageService? LocalStorageService { get; set; }
+
+    [Inject]
+    NavigationManager? NavigationManager { get; set; }
+
+    private String logingStr = "About";
+
+
+    protected async override Task OnInitializedAsync()
+    {
+        var authState = await AuthState;
+
+        if (authState.User.Identity.IsAuthenticated)
+        {
+            //authState.User.Claims.FirstOrDefault(i => i.ValueType == ClaimTypes.EMail);
+
+            logingStr = await LocalStorageService.GetItemAsStringAsync("email");
+        }
+        else
+        {
+            NavigationManager.NavigateTo("/login");
+        }
+    }
+}

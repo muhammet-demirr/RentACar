@@ -1,0 +1,160 @@
+﻿@page "/admin/carLocations/add"
+@page "/admin/carLocations/edit/{CarLocationId:guid}"
+@layout MainAdminLayout
+@using Blazored.LocalStorage
+@using Morris.Blazor.FluentValidation
+@using Morris.Blazor.Validation
+@using RentACar.Application.CustomExceptions
+@using RentACar.Application.DTOs
+@using RentACar.Application.Validators
+@using RentACar.Client.Utils
+@using RentACar.Domain.Enums
+@using RentACar.Domain.Enums.Helper
+
+<EditForm Model="@carLocation" OnValidSubmit="SubmitForm">
+    <Validate ValidationProperties=@(ValidationProperties.Set.FluentValidator<CarLocationValidator>()) OnTransformModel=OnTransformModel />
+    <RadzenColumn Size="12" Style="width:%60" SizeMD="6">
+        <RadzenStack>
+            <RadzenFieldset Text="Lokasyon Ekleme Sayfası">
+                <RadzenStack Gap="1rem">
+
+
+                    <RadzenRow AlignItems="AlignItems.Center">
+                        <RadzenColumn Size="12" SizeMD="4">
+                            <RadzenLabel Text="Şehir" />
+                        </RadzenColumn>
+                        <RadzenColumn Size="12" SizeMD="8">
+                            <RadzenDropDown @bind-Value="carLocation.CarId" AllowClear="true" Placeholder="seçim yapınız" Data="@cars" Style="width: 50%;" TextProperty="CarName" ValueProperty="Id" Name="Id">
+                            </RadzenDropDown>
+                            <ValidationMessage For="@(() => carLocation.CarId)" />
+                        </RadzenColumn>
+
+                    </RadzenRow>
+                    <RadzenRow AlignItems="AlignItems.Center">
+                        <RadzenColumn Size="12" SizeMD="4">
+                            <RadzenLabel Text="Lokasyon" />
+                        </RadzenColumn>
+                        <RadzenColumn Size="12" SizeMD="8">
+                            <RadzenDropDown @bind-Value="carLocation.LocationId" AllowClear="true" Placeholder="seçim yapınız" Data="@locations" Style="width: 50%;" TextProperty="Decription" ValueProperty="Id" Name="Id"/>
+
+                                <ValidationMessage For="@(() => carLocation.LocationId)" />
+                        </RadzenColumn>
+                    </RadzenRow>
+
+
+                    @*                     <RadzenRow AlignItems="AlignItems.Center">
+                    <RadzenColumn Size="12" SizeMD="4">
+                    <RadzenLabel Text="Expiry Date" />
+                    </RadzenColumn>
+                    <RadzenColumn Size="12" SizeMD="8">
+                    <RadzenDatePicker Style="width: 100%;" Name="ExpiryDate" @bind-Value="order.ExpiryDate" />
+                    </RadzenColumn>
+                    </RadzenRow>
+                    <RadzenRow AlignItems="AlignItems.Center">
+                    <RadzenColumn Size="12" SizeMD="4">
+                    <RadzenLabel Text="Cardholder" />
+                    </RadzenColumn>
+                    <RadzenColumn Size="12" SizeMD="8">
+                    <RadzenTextBox Style="width: 100%;" Name="CardHolder" />
+                    </RadzenColumn>
+                    </RadzenRow> *@
+                </RadzenStack>
+            </RadzenFieldset>
+        </RadzenStack>
+    </RadzenColumn>
+    <RadzenStack Orientation="Orientation.Horizontal" JustifyContent="JustifyContent.Center" Gap="1rem" Class="rz-mt-8 rz-mb-4">
+        <RadzenButton ButtonType="ButtonType.Submit" Size="ButtonSize.Large" Icon="save" Text="Kaydet" />
+        <RadzenButton ButtonStyle="ButtonStyle.Light" Variant="Variant.Flat" Size="ButtonSize.Large" Icon="cancel" Text="Geri Dön" Click="@goBackGroupList" />
+    </RadzenStack>
+</EditForm>
+
+@code {
+    [Parameter]
+    public Guid CarLocationId { get; set; }
+    [Inject]
+    public HttpClient HttpClient { get; set; }
+
+    [Inject]
+    public ModalManager ModalManager { get; set; }
+
+    [Inject]
+    public NavigationManager NavigationManager { get; set; }
+    [Inject]
+    ILocalStorageService localStorageService { get; set; }
+
+    private CarLocationDTO carLocation = new CarLocationDTO();
+
+    private List<CarDTO> cars = new List<CarDTO>();
+    private List<LocationDTO> locations = new List<LocationDTO>();
+
+    protected async override Task OnInitializedAsync()
+    {
+        string token = await localStorageService.GetItemAsStringAsync("token");
+        cars = await HttpClient.GetServiceResponseAsync<List<CarDTO>>("api/car/cars/", token);
+        locations = await HttpClient.GetServiceResponseAsync<List<LocationDTO>>("api/locatio/locations", token);
+        if (CarLocationId != null && CarLocationId != Guid.Empty)
+        {
+
+            carLocation = await HttpClient.GetServiceResponseAsync<CarLocationDTO>("api/CarLocatio/CarLocationById/" + CarLocationId, token, true);
+        }
+
+
+    }
+    async Task editOrUpdate(CarLocationDTO carLocationDTO)
+    {
+
+        try
+        {
+
+            String url = "api/CarLocatio/create";
+            carLocation = carLocationDTO;
+            // Update
+            if (CarLocationId != null && CarLocationId != Guid.Empty)
+            {
+                url = "api/CarLocatio/update";
+                carLocation.UpdatedDate = DateTime.Now;
+                carLocation.UpdatedUser = await localStorageService.GetItemAsStringAsync("email");
+            }
+            else
+            {
+                carLocation.CreateDate = DateTime.Now;
+                carLocation.CreatedUser = await localStorageService.GetItemAsStringAsync("email");
+            }
+            string token = await localStorageService.GetItemAsStringAsync("token");
+
+            carLocation = await HttpClient.PostGetServiceResponseAsync<CarLocationDTO, CarLocationDTO>(url, carLocation, token, true);
+
+            NavigationManager.NavigateTo("/admin/carLocations");
+        }
+        catch (ApiException ex)
+        {
+            await ModalManager.ShowMessageAsync("Api Exception", ex.Message);
+        }
+        catch (Exception ex)
+        {
+            await ModalManager.ShowMessageAsync("Exception", ex.Message);
+        }
+
+
+
+
+    }
+    async Task SubmitForm(EditContext editContext)
+    {
+        if (editContext.Validate())
+        {
+            await editOrUpdate((CarLocationDTO)editContext.Model);
+        }
+    }
+    void goBackGroupList()
+    {
+        NavigationManager.NavigateTo("/admin/carLocations");
+    }
+    private object OnTransformModel(object model)
+    {
+        // Confirm that the model is of the expected type
+        // Do transformations here
+        // return the transformed model
+        return model;
+    }
+}

@@ -1,0 +1,157 @@
+﻿@page "/admin/Cars"
+@using Blazored.LocalStorage
+@using Microsoft.AspNetCore.SignalR.Client
+@using RentACar.Application.CustomExceptions
+@using RentACar.Application.DTOs
+@using RentACar.Client.Utils
+@using RentACar.Domain.Models
+@layout MainAdminLayout
+<RadzenButton Shade="Shade.Dark" Click=goCreateCarPage Icon="add" Variant="Variant.Flat" Text="Araba Ekle" ButtonStyle="ButtonStyle.Success" />
+@if (Cars != null)
+{
+
+
+    <RadzenDataGrid AllowFiltering="true"
+                    FilterMode="FilterMode.Simple"
+                    ShowCellDataAsTooltip="true"
+                    ColumnWidth="200px"
+                    FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive"
+                    AllowColumnPicking="true"
+                    AllowPaging="true" PageSize="10"
+                    AllowSorting="true" Data="@Cars"
+                    TItem="CarDTO">
+        <Columns>
+            <RadzenDataGridColumn TItem="CarDTO" Context="car" Filterable="false" Sortable="false" TextAlign="TextAlign.Right" Width="156px">
+                <Template Context="car">
+                    <RadzenButton Icon="edit" ButtonStyle="ButtonStyle.Light" Variant="Variant.Flat" Size="ButtonSize.Medium" Click="@(() => goUpdateCarPage(car.Id))">
+                    </RadzenButton>
+                    <RadzenButton ButtonStyle="ButtonStyle.Danger" Icon="delete" Variant="Variant.Flat" Shade="Shade.Lighter" Size="ButtonSize.Medium" class="my-1 ms-1" Click="@(() => DeleteCar(car.Id))">
+                    </RadzenButton>
+                </Template>
+            </RadzenDataGridColumn>
+            <RadzenDataGridColumn TItem="CarDTO" Title="Resim" Frozen="true" Sortable="false" Filterable="false" Width="80px" TextAlign="TextAlign.Center">
+                <Template Context="data">
+                    <RadzenImage Path="@data.Photo" class="rz-gravatar" />
+                </Template>
+            </RadzenDataGridColumn>
+            <RadzenDataGridColumn TItem="CarDTO" Property="Id" Title="Id" />
+
+            <RadzenDataGridColumn TItem="CarDTO" Property="CarNameModel" Title="Araba Adı" />
+            <RadzenDataGridColumn TItem="CarDTO" Property="Person" Title="Max Kişi Sayısı" />
+
+            <RadzenDataGridColumn TItem="CarDTO" Property="Luggage" Title="Bagaj Kapasite" />
+            <RadzenDataGridColumn TItem="CarDTO" Property="CarPrice" Title="Fiyat" />
+            <RadzenDataGridColumn TItem="CarDTO" Property="Door" Title="Kapı Sayısı" />
+            <RadzenDataGridColumn TItem="CarDTO" Property="gear" Title="Vites Türü" />
+            <RadzenDataGridColumn TItem="CarDTO" Property="FuelType" Title="Yakıt Türü" />
+            <RadzenDataGridColumn TItem="CarDTO" Property="CarYear" Title="Araba Yaşı" />
+            <RadzenDataGridColumn TItem="CarDTO" Property="Depozit" Title="Depozito" />
+            <RadzenDataGridColumn TItem="CarDTO" Property="DrivingLicense" Title="Sürücü Ehliyet Yaşı" />
+            <RadzenDataGridColumn TItem="CarDTO" Property="TotalKm" Title="Toplam Km" />
+            <RadzenDataGridColumn TItem="CarDTO" Property="IsAc" Title="Klima Varmı ?" />
+        </Columns>
+    </RadzenDataGrid>
+
+}
+
+@code {
+    [Inject]
+    public HttpClient Client { get; set; }
+
+    [Inject]
+    ModalManager ModalManager { get; set; }
+
+    [Inject]
+    NavigationManager NavigationManager { get; set; }
+    [Inject]
+    ILocalStorageService localStorageService { get; set; }
+
+    protected IEnumerable<CarDTO> Cars;
+    private HubConnection _hubConnection;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var hub = NavigationManager.ToAbsoluteUri("/signalrhub");
+        _hubConnection = new HubConnectionBuilder().WithUrl(hub).Build();
+        await _hubConnection.StartAsync();
+        _hubConnection.On("Receivemessage",  () =>
+        {
+
+            CallloadData();
+            StateHasChanged();
+        });
+    if (Cars is null)
+        {
+            await LoadList();
+        }
+        
+    }
+    private void CallloadData()
+    {
+        Task.Run(async () =>
+        {
+            await LoadList();
+        });
+    }
+    protected async Task LoadList()
+    {
+        try
+        {
+            string token = await localStorageService.GetItemAsStringAsync("token");
+            Cars = await Client.GetServiceResponseAsync<List<CarDTO>>("/api/car/cars", token);
+            StateHasChanged();
+
+        }
+        catch (ApiException ex)
+        {
+            await ModalManager.ShowMessageAsync("Api Exception", ex.Message);
+        }
+        catch (Exception ex)
+        {
+
+            await ModalManager.ShowMessageAsync("Exception Exception", ex.Message);
+        }
+    }
+
+    public async void DisposeAsync()
+    {
+        await _hubConnection.DisposeAsync();
+
+    }
+    protected void goCreateCarPage()
+    {
+        NavigationManager.NavigateTo("/admin/cars/add");
+    }
+    protected void goUpdateCarPage(Guid Id)
+    {
+        NavigationManager.NavigateTo("/admin/cars/edit/" + Id);
+    }
+    protected async Task DeleteCar(Guid Id)
+    {
+        bool confirmed = await ModalManager.ConfirmationAsync("Silme İşlemi", "Arabayı silmek istediğinize eminmisiniz ?");
+        if (!confirmed) return;
+        try
+        {
+            string token = await localStorageService.GetItemAsStringAsync("token");
+            bool deleted = await Client.PostGetServiceResponseAsync<bool, Guid>("/api/car/delete", Id, token);
+            if (deleted)
+            {
+                await ModalManager.ShowMessageAsync("Bildirim", "Silme İşlemi Tamamlandı", 4);
+                NavigationManager.NavigateTo("/admin/cars", true);
+            }
+            else
+            {
+                await ModalManager.ShowMessageAsync("Bildirim", "Silme İşlemi Tamamlanamadı!!!!!!", 7);
+            }
+        }
+        catch (ApiException ex)
+        {
+            await ModalManager.ShowMessageAsync("Api Exception", ex.Message);
+        }
+        catch (Exception ex)
+        {
+
+            await ModalManager.ShowMessageAsync("Exception", ex.Message);
+        }
+    }
+}

@@ -1,0 +1,77 @@
+@using RentACar.Application.DTOs
+@using RentACar.Client.Utils
+@using RentACar.Domain.Enums
+<section id="vehicles" class="container">
+    <h2 class="title wow fadeInDown" data-wow-offset="200">Araç Modelleri - <span class="subtitle">Bir bakýþta filomuz</span></h2>
+    <RadzenDataList IsLoading="active" WrapItems="true" AllowPaging="false" Data="@cars" TItem="CarDTO">
+        <Template Context="car">
+            <RadzenCard Class="rz-my-12 rz-mx-auto" Style="width: 500px">
+                <RadzenStack Orientation="Orientation.Horizontal" JustifyContent="JustifyContent.Start" Gap="1rem" Class="rz-p-4">
+                    <RadzenImage   Path="@car?.Photo" Style="width: 150px; height: 150px; border-radius: 50%;" />
+                    <RadzenStack Gap="0">
+                        <RadzenText TextStyle="TextStyle.Overline" class="rz-display-flex rz-mt-2 rz-my-0">Araç</RadzenText>
+                        <RadzenText TextStyle="TextStyle.Body1"><b>@(car?.CarName)</b></RadzenText>
+                        <RadzenText TextStyle="TextStyle.Overline" class="rz-display-flex rz-mt-4 rz-mb-0">Modeli</RadzenText>
+                        <RadzenText TextStyle="TextStyle.Body1"><b>@car?.CarModel</b></RadzenText>
+                    </RadzenStack>
+                </RadzenStack>
+                <RadzenCard class="rz-shadow-0 rz-border-radius-0 rz-p-8" style="background-color:#f86207;margin: 1rem calc(-1 * var(--rz-card-padding));">
+                    <RadzenText TextStyle="TextStyle.H6" class="rz-color-on-primary-light"><strong>Araç Bilgileri</strong></RadzenText>
+                    <RadzenRow RowGap="0">
+                        <RadzenColumn SizeSM="4">
+                            <RadzenText TextStyle="TextStyle.Overline" class="rz-color-on-primary-light rz-display-flex rz-mt-4 rz-mb-0">Vites Türü</RadzenText>
+                            <RadzenText TextStyle="TextStyle.Body1" class="rz-color-on-primary-light"><b>@(car?.gear)</b></RadzenText>
+                            <RadzenText TextStyle="TextStyle.Overline" class="rz-color-on-primary-light rz-display-flex rz-mt-4 rz-mb-0">Araç Yýlý</RadzenText>
+                            <RadzenText TextStyle="TextStyle.Body1" class="rz-color-on-primary-light"><b>@(car?.CarYear)</b></RadzenText>
+                        </RadzenColumn>
+                        <RadzenColumn SizeSM="8">
+                            <RadzenText TextStyle="TextStyle.Overline" class="rz-color-on-primary-light rz-display-flex rz-mt-4 rz-mb-0">Yakýt Türü</RadzenText>
+                            <RadzenText TextStyle="TextStyle.Body1" class="rz-color-on-primary-light"><b>@(car?.FuelType)</b></RadzenText>
+                            <RadzenText TextStyle="TextStyle.Overline" class="rz-color-on-primary-light rz-display-flex rz-mt-4 rz-mb-0">Bagaj Kapasitesi</RadzenText>
+                            <RadzenText TextStyle="TextStyle.Body1" class="rz-color-on-primary-light"><b>@car?.Luggage</b></RadzenText>
+                        </RadzenColumn>
+                    </RadzenRow>
+                </RadzenCard>
+            @*     <RadzenStack Orientation="Orientation.Horizontal" JustifyContent="JustifyContent.End" Gap="0">
+                    <RadzenButton Variant="Variant.Text" class="rz-text-secondary-color" Text="Cancel" />
+                    <RadzenButton Variant="Variant.Text" Text="Send" />
+                </RadzenStack> *@
+            </RadzenCard>
+        </Template>
+    </RadzenDataList>
+
+    <RadzenPager   HorizontalAlign="HorizontalAlign.Center" Count="count" PageSize="@pageSize" PageNumbersCount="5" PageChanged="@PageChanged" />
+
+  
+</section>
+@code {
+    [Inject]
+    HttpClient Client { get; set; }
+    string pagingSummaryFormat = "Gösterilecek Sayfa {0} ile {1} (Toplam {2} Kayýtlar)";
+    int pageSize = 4;
+    int count;
+    bool active=true;
+    List<CarDTO> cars;
+
+    protected override async Task OnInitializedAsync()
+    {
+        // await base.OnInitializedAsync();
+        cars = await Getcars(0, pageSize);
+        active = false;
+        var carsst = await Client.GetServiceResponseNullTokenAsync<List<CarDTO>>("api/Car/Cars");
+        count = carsst.Count();
+
+    }
+
+    async void PageChanged(PagerEventArgs args)
+    {
+        cars = await Getcars(args.Skip, args.Top);
+    }
+
+    async Task< List<CarDTO>> Getcars(int skip, int take)
+    {
+        var carss  = await Client.GetServiceResponseNullTokenAsync<List<CarDTO>>("api/Car/Cars");
+        
+        return carss.Skip(skip).Take(take).ToList();
+    }
+  }

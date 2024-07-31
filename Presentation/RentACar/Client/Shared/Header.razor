@@ -1,0 +1,94 @@
+﻿<header data-spy="affix" data-offset-top="39" data-offset-bottom="0" class="large">
+
+    <div style="text-align:center" class="row box">
+        <div class="col-md-5">
+            <!-- Logo start -->
+
+            <div class="brand">
+                <h1>
+                    <RadzenStack AlignItems="AlignItems.Start" JustifyContent="JustifyContent.Center" class="rz-mx-auto">
+                        <a class="scroll-to" href="#top">
+                            <img class="img-responsive" src="/website/beyaz-logo.png" alt="Car|Rental">
+                        </a>
+                    </RadzenStack>
+
+                </h1>
+            </div>
+
+
+            <!-- Logo end -->
+        </div>
+
+        <div class="col-md-7">
+            <div class="pull-right">
+                <div class="header-info pull-right">
+                    <div style="color:#fff" class="contact pull-left">İletişim: (562) 498-4600</div>
+                    <!-- Language Switch start -->
+                    <div class="language-switch pull-right">
+                        <div class="dropdown">
+                            <a data-toggle="dropdown" href="#" style="font-size:12px;background-color:#343a40;" id="language-switch-dropdown">Select your language </a>
+                            <ul class="dropdown-menu" role="menu" aria-labelledby="language-switch-dropdown">
+                                <li><a href="#"><img src="/website/img/flags/United-States.png" alt="usa"> English</a></li>
+                                <li><a href="#"><img src="/website/img/flags/Germany.png" alt="germany"> German</a></li>
+                                <li><a href="#"><img src="/website/img/flags/France.png" alt="france"> French</a></li>
+                            </ul>
+                        </div>
+                    </div>
+                    <!-- Language Switch end -->
+                </div>
+            </div>
+
+            <div class="clearfix"></div>
+
+            <!-- start navigation -->
+            <nav class="navbar navbar-default" role="navigation">
+                <div>
+                    <!-- Toggle get grouped for better mobile display -->
+                    <div class="navbar-header">
+                        <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1">
+                            <span class="sr-only">Toggle navigation</span>
+                            <span class="icon-bar"></span>
+                            <span class="icon-bar"></span>
+                            <span class="icon-bar"></span>
+                        </button>
+                        <RadzenStack AlignItems="AlignItems.Start" JustifyContent="JustifyContent.Center" class="rz-mx-auto">
+                            <a class="navbar-brand scroll-to" href="#top">
+                                <img class="img-responsive" src="/website/beyaz-logo.png" alt="Car|Rental">
+                            </a>
+                        </RadzenStack>
+                        @*                         <a class="navbar-brand scroll-to" href="#top"><img class="img-responsive" src="/website/beyaz-logo.png" style="max-height:stretch" alt="Car|Rental"></a>
+                        *@
+                    </div>
+                    <!-- Collect the nav links, for toggling -->
+                    <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+                        <!-- Nav-Links start -->
+                        <ul class="nav navbar-nav navbar-right">
+                            <li><button type="button" onclick="document.getElementById('top').scrollIntoView({behavior:'smooth'})" style="margin-right:0.5rem" class="nav-button" data-bs-toggle="button">Anasayfa</button></li>
+                            <li><button type="button" onclick="document.getElementById('services').scrollIntoView({behavior:'smooth'})" style="margin-right:0.5rem" class="nav-button" data-bs-toggle="button">Hizmetlerimiz</button></li>
+                            <li><button type="button" onclick="document.getElementById('vehicles').scrollIntoView({behavior:'smooth'})" style="margin-right:0.5rem" class="nav-button" data-bs-toggle="button">Araçlarimız</button></li>
+                            @*          <li class="dropdown">
+                            <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">Blog <span class="caret"></span></a>
+                            <ul class="dropdown-menu" role="menu">
+                            <li><a href="blog-posts.html">Blog Posts</a></li>
+                            <li><a href="blog-single-post.html">Blog Single Post</a></li>
+                            <li><a href="error404.html">Error 404</a></li>
+                            </ul>
+                            </li> *@
+                            <li><button type="button" onclick="document.getElementById('information').scrollIntoView({behavior:'smooth'})" style="margin-right:0.5rem" class="nav-button" data-bs-toggle="button">Hakkımızda</button></li>
+                            <li><button type="button" onclick="document.getElementById('partners').scrollIntoView({behavior:'smooth'})" style="margin-right:0.5rem" class="nav-button" data-bs-toggle="button">Referanslarımız</button></li>
+                            <li><button type="button" onclick="document.getElementById('contact').scrollIntoView({behavior:'smooth'})" style="margin-right:0.5rem" class="nav-button" data-bs-toggle="button">İletişim</button></li>
+                            @*   <li><a href="#locations" class="scroll-to">Locations</a></li>
+                            <li><a href="#contact" class="scroll-to">Contact</a></li> *@
+                        </ul>
+                        <!-- Nav-Links end -->
+                    </div>
+                </div>
+            </nav>
+            <!-- end navigation -->
+        </div>
+    </div>
+
+</header>
+@code {
+
+}

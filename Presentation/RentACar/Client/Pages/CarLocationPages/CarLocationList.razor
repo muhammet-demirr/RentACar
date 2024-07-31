@@ -1,0 +1,114 @@
+﻿@page "/admin/CarLocations"
+@using Blazored.LocalStorage
+@using RentACar.Application.CustomExceptions
+@using RentACar.Application.DTOs
+@using RentACar.Client.Utils
+@using RentACar.Domain.Models
+@layout MainAdminLayout
+
+<RadzenButton Shade="Shade.Dark" Click=goCreateCarLocationPage Icon="add" Variant="Variant.Flat" Text="Araba Lokasyonu Ekle" ButtonStyle="ButtonStyle.Success" />
+
+<RadzenDataGrid AllowFiltering="true"
+                FilterMode="FilterMode.Simple"
+                ShowCellDataAsTooltip="true"
+                ColumnWidth="200px"
+                FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive"
+                AllowColumnPicking="true"
+                AllowPaging="true" PageSize="10"
+                AllowSorting="true" Data="@CarLocations"
+                TItem="CarLocationDTO">
+    <Columns>
+        <RadzenDataGridColumn TItem="CarLocationDTO" Context="carLocation" Filterable="false" Sortable="false" TextAlign="TextAlign.Right" Width="156px">
+            <Template Context="carLocation">
+                <RadzenButton Icon="edit" ButtonStyle="ButtonStyle.Light" Variant="Variant.Flat" Size="ButtonSize.Medium" Click="@(() => goUpdateCarLocationPage(carLocation.Id))">
+                </RadzenButton>
+                <RadzenButton ButtonStyle="ButtonStyle.Danger" Icon="delete" Variant="Variant.Flat" Shade="Shade.Lighter" Size="ButtonSize.Medium" class="my-1 ms-1" Click="@(() => DeleteCarLocation(carLocation.Id))">
+                </RadzenButton>
+            </Template>
+        </RadzenDataGridColumn>
+        
+        <RadzenDataGridColumn TItem="CarLocationDTO" Property="CarName" Title="Araba Adı" />
+
+        <RadzenDataGridColumn TItem="CarLocationDTO" Property="CarModel" Title="Modeli" />
+        <RadzenDataGridColumn TItem="CarLocationDTO" Property="City" Title="Şehir" />
+
+        <RadzenDataGridColumn TItem="CarLocationDTO" Property="LocationDescription" Title="Lokasyon adresi" />
+    
+    </Columns>
+</RadzenDataGrid>
+
+
+@code {
+    [Inject]
+    public HttpClient Client { get; set; }
+
+    [Inject]
+    ModalManager ModalManager { get; set; }
+
+    [Inject]
+    NavigationManager NavigationManager { get; set; }
+    [Inject]
+    ILocalStorageService localStorageService { get; set; }
+
+    protected IEnumerable<CarLocationDTO> CarLocations;
+
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadList();
+
+    }
+    protected async Task LoadList()
+    {
+        try
+        {
+            string token = await localStorageService.GetItemAsStringAsync("token");
+            CarLocations = await Client.GetServiceResponseAsync<List<CarLocationDTO>>("/api/carLocatio/carLocations", token);
+        }
+        catch (ApiException ex)
+        {
+            await ModalManager.ShowMessageAsync("Api Exception", ex.Message);
+        }
+        catch (Exception ex)
+        {
+
+            await ModalManager.ShowMessageAsync("Exception Exception", ex.Message);
+        }
+    }
+    protected void goCreateCarLocationPage()
+    {
+        NavigationManager.NavigateTo("/admin/carLocations/add");
+    }
+    protected void goUpdateCarLocationPage(Guid Id)
+    {
+        NavigationManager.NavigateTo("/admin/carLocations/edit/" + Id);
+    }
+    protected async Task DeleteCarLocation(Guid Id)
+    {
+        bool confirmed = await ModalManager.ConfirmationAsync("Silme İşlemi", "Araba Locasyonunu silmek istediğinize eminmisiniz ?");
+        if (!confirmed) return;
+        try
+        {
+            string token = await localStorageService.GetItemAsStringAsync("token");
+            bool deleted = await Client.PostGetServiceResponseAsync<bool, Guid>("/api/carLocatio/delete", Id, token);
+            if (deleted)
+            {
+                await ModalManager.ShowMessageAsync("Bildirim", "Silme İşlemi Tamamlandı", 4);
+                NavigationManager.NavigateTo("/admin/carLocations", true);
+            }
+            else
+            {
+                await ModalManager.ShowMessageAsync("Bildirim", "Silme İşlemi Tamamlanamadı!!!!!!", 7);
+            }
+        }
+        catch (ApiException ex)
+        {
+            await ModalManager.ShowMessageAsync("Api Exception", ex.Message);
+        }
+        catch (Exception ex)
+        {
+
+            await ModalManager.ShowMessageAsync("Exception", ex.Message);
+        }
+    }
+}
