@@ -71,3 +71,56 @@ Hemen Kirala Butonu: Kullanıcıların hızlıca araç kiralama işlemini başla
 #### Sonuç
 Bu detaylar, ASP.NET Core ve PostgreSQL kullanarak oluşturduğunuz Araç Rezervasyon ekranının nasıl yapılandırıldığını ve geliştirildiğini açıklar. Bu yapı, kullanıcıların araç kiralama sürecini kolay ve hızlı bir şekilde tamamlamalarını sağlar. Herhangi bir sorunuz olursa veya eklemek istediğiniz başka detaylar varsa, lütfen bildirin.
 
+### Admin Ekranı Ekranı
+
+#### Admin Giriş Ekranı
+
+![admingiriş](https://github.com/user-attachments/assets/90ce20c5-99ae-4c4b-90d6-b99fb99d6992)
+
+#### Admin Ana Ekranı
+
+![AdminAnaekran](https://github.com/user-attachments/assets/d4a8724b-33ec-401c-b5a3-c4d2946559c6)
+
+![Adminlokasyon](https://github.com/user-attachments/assets/3ca5b763-7b54-4156-acb3-a24116379c44)
+
+![Adminrezarvasyon](https://github.com/user-attachments/assets/bf51af10-96dc-43b2-9ddd-167db66d20d1)
+
+### Proje Yapısı ve Katmanlar
+
+![Proje Yapım](https://github.com/user-attachments/assets/9c78aff6-7cb0-4d8b-8ccd-c1076e4a9840)
+
+Projeniz üç ana katmana ayrılmış: Core (Çekirdek), Infrastructure (Altyapı) ve Presentation (Sunum). Bu yapı, kodun modülerliğini, okunabilirliğini ve bakımını kolaylaştırır.
+
+#### 1. Core (Çekirdek)
+
+Bu katman, iş mantığınızı ve domain modellerinizi içerir.
+
+RentACar.Application
+
+- Bağımlılıklar (Dependencies): Bu klasör, uygulama katmanındaki bağımlılıkları yönetmek için kullanılır.
+- CustomExceptions (Özel İstisnalar): Uygulama özel istisnalarınızı tanımladığınız klasör.
+- DTOs (Data Transfer Objects): Verilerin taşınması için kullanılan nesneler.
+- IServices: Hizmet arayüzleri. Uygulama içinde kullanılacak hizmetlerin tanımları burada yer alır.
+- ResponseModels (Yanıt Modelleri): API veya servis yanıtları için kullanılan modeller.
+- Validators (Doğrulayıcılar): Verilerin doğrulanması için kullanılan sınıflar.
+- 
+RentACar.Domain
+
+- Bağımlılıklar (Dependencies): Domain katmanındaki bağımlılıkları yönetmek için kullanılır.
+- Enums (Sabitler): Projede kullanılan sabit değerler (enum) burada tanımlanır.
+- Mappings (Eşlemeler): Veri eşlemeleri için kullanılan sınıflar.
+- Models (Modeller): Domain modelleri, iş mantığınızın çekirdeğini oluşturur.
+
+#### 2. Infrastructure (Altyapı)
+
+Bu katman, veritabanı erişimi ve diğer dış bağımlılıkların yönetimini içerir.
+
+- RentACar.Infrastructure: Genel altyapı kodları.
+- RentACar.Persistence: Veritabanı işlemleri ve ORM (Object-Relational Mapping) yapılandırmaları.
+
+#### 3. Presentation (Sunum)
+
+Bu katman, kullanıcıya sunulan arayüzler ve API'leri içerir.
+
+- RentACar.Client: Kullanıcı arayüzü ile ilgili kodlar (muhtemelen bir web veya mobil arayüz).
+- RentACar.Server: API'lerin ve sunucu tarafı işlemlerinin yönetildiği katman.
